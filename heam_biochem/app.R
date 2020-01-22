@@ -51,30 +51,30 @@ mdata <- function( n,beta0, beta1, beta2, ar.val, sigma, tau0, tau1, tau01, m ) 
 
 biochemistry <- c(
     "Fasting blood glucose (mg/dL)"  ,
-    "Hba1c glycosylated hemoglobin (%)",  
-    "non fasting blood Glucose (mg/dL)" , 
-    "Calcium mmol/L"  ,
-    "Chloride mmol/L" ,
-    "Creatine phosphokinase (CPK) U/L",  
-    "Inorganic phophorous mmol/L",
-    "Magnesium mmol/L"   ,
-    "Potassium mmol/L"  ,
-    "Sodium mmol/L" ,
-    "Albumin g/L"   ,
-    "Blood urea nitrogen BUN mmol/L"  ,
+    "HbA1c glycosylated hemoglobin (%)",  
+    "Non fasting blood Glucose (mg/dL)" , 
+    "Calcium (mmol/L)"  ,
+    "Chloride (mmol/L)" ,
+    "Creatine phosphokinase (U/L)",  
+    "Inorganic phophorous (mmol/L)",
+    "Magnesium (mmol/L)"   ,
+    "Potassium (mmol/L)"  ,
+    "Sodium (mmol/L)" ,
+    "Albumin (g/L)"   ,
+    "Blood urea nitrogen (mmol/L)"  ,
     "Creatinine (umol/L)" ,
-    "Total protein g/L"  ,
-    "Uric acid umol/L"  ,
-    "Direct bilirubin umol/L",  
+    "Total protein (g/L)"  ,
+    "Uric acid (umol/L)"  ,
+    "Direct bilirubin (umol/L)",  
     "Gamma glutamyltransferase",  
-    "Indirect bilirubin umol/L" ,
-    "Total bilirubin umol/L" ,
-    "Alkaline phosphatase U/L", 
-    "High density lipoprotein mmol/L" , 
-    "Low density lipoprotein mmol/L"  ,
+    "Indirect bilirubin (umol/L)" ,
+    "Total bilirubin (umol/L)" ,
+    "Alkaline phosphatase (U/L)", 
+    "High density lipoprotein (mmol/L)" , 
+    "Low density lipoprotein (mmol/L)"  ,
     "Lipase (U/L)",
-    "Total cholesterol mmol/L",  
-    "Triglycerides mmol/L"  
+    "Total cholesterol (mmol/L)",  
+    "Triglycerides (mmol/L)"  
 )
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ui <- fluidPage(theme = shinytheme("journal"),
@@ -90,13 +90,16 @@ ui <- fluidPage(theme = shinytheme("journal"),
                     
                     sidebarPanel( 
                         
-                    div(p("Typically reams and reams of outputs are generated (but thankfully not printed) consisting of summary statistics,
-                          perhaps overtime, for many biochemistry and haemotology parameters. How useful this is is open to debate,
-                          but in my experience these outputs are hardly looked at, perhaps one or two parameters are singled out and 
-                        scrutinised. This is not suprising because the presentation is very dry. There is the issue also that it is
-                          quite possible that a different data set can give rise to similar summary statistics [1]. Spotting errors 
-                          too in the data is not easy with this kind of presentation. I would argue that these parameters should always be 
-                          plotted. RShiny is an ideal medium to communicate this information in a more informative and exciting way. 
+                    div(p("Typically for clinical trials and non interventional studies reams of outputs are generated (thankfully not printed) that consist of summary statistics,
+                          perhaps overtime, for a panel of biochemistry and haemotology parameters. 
+                          How useful this format is is open to debate...the presentation is very dry. 
+                          There is the issue too, that it is
+                          quite possible a different data set can give rise to similar summary statistics [1]. 
+                          Spotting errors in the data is also not easy and
+                          tracking individual patient profiles not possible.
+                          I would argue that these parameters should always be 
+                          plotted. R Shiny is an ideal medium to communicate this information
+                          in a more useful and exciting way. 
                           I will make an attempt using simulated data.")),
                         
                         div(
@@ -128,6 +131,7 @@ ui <- fluidPage(theme = shinytheme("journal"),
                                         strong("Select plot preference "),
                                         choices=biochemistry),
                             
+                            textInput('vec1', 'Enter sample id (comma delimited), enter 999 to show all profiles', "1,2,3,4"),
                             
                             sliderInput("N",
                                         "Select the total number of data points",
@@ -184,7 +188,7 @@ ui <- fluidPage(theme = shinytheme("journal"),
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~end of section to add colour     
                             tabPanel("Plotting the data", 
                                      
-                                     div(plotOutput("reg.plot3", width=fig.width, height=fig.height)),  
+                                     div(plotOutput("reg.plot", width=fig.width, height=fig.height)),  
                                      
                                      
                                      h3("Figure 1 Left panel untransformed data, right panel natural log transformation labelled with antilogs"),
@@ -292,14 +296,14 @@ server <- shinyServer(function(input, output   ) {
     make.data <- reactive({
         
         sample <- random.sample()
-        n<-  sample$n  
-        
-        y <- rlnorm(n, .7, 1.5) 
-        x <- factor(sample(3, length(y), repl = TRUE))
-        
-        d <- data.frame(x=x, y=y)
-        d$logy <- log(d$y) # log the data
-        
+        # n<-  sample$n  
+        # 
+        # y <- rlnorm(n, .7, 1.5) 
+        # x <- factor(sample(3, length(y), repl = TRUE))
+        # 
+        # d <- data.frame(x=x, y=y)
+        # d$logy <- log(d$y) # log the data
+        # 
         is.even <- function(x){ x %% 2 == 0 }
         
         mdata <- function( n,beta0, beta1, beta2, ar.val, sigma, tau0, tau1, tau01, m ) {
@@ -416,7 +420,7 @@ server <- shinyServer(function(input, output   ) {
         
         
           
-        return(list(d=d, d1=d1))# rangez=rangez, outliers=outliers, n=n, dp=dp))
+        return(list(  d1=d1))# rangez=rangez, outliers=outliers, n=n, dp=dp))
         
         
     })
@@ -424,14 +428,14 @@ server <- shinyServer(function(input, output   ) {
     make.data2 <- reactive({
         
         sample <- random.sample()
-        rangez <-    sample$Whisker       # multiples of IQR length of whiskers, 0 means out to maximum
-        n<-          sample$n  
-        
-        y<- c(rbeta(n-4, 2,6)*35,  sample(50:150,4, replace=FALSE))
-        x <- factor(sample(3, length(y), repl = TRUE))
-        
-        d <- data.frame(x=x, y=y)
-        d$logy <- log(d$y) # log the data
+        # rangez <-    sample$Whisker       # multiples of IQR length of whiskers, 0 means out to maximum
+        # n<-          sample$n  
+        # 
+        # y<- c(rbeta(n-4, 2,6)*35,  sample(50:150,4, replace=FALSE))
+        # x <- factor(sample(3, length(y), repl = TRUE))
+        # 
+        # d <- data.frame(x=x, y=y)
+        # d$logy <- log(d$y) # log the data
         
         return(list(d=d , y=d$y, rangez=rangez))# 
         
@@ -455,15 +459,12 @@ server <- shinyServer(function(input, output   ) {
                 stat_boxplot(geom = "errorbar", width = 0.3) +
                 geom_boxplot( outlier.colour = NA  ) +  # removed fill=NA
                 geom_line(aes(group=rep), position = pd,  alpha=0.6, linetype="dotted")   + 
-                
-                
                 scale_size_manual( values = c( 1) ) +
                 geom_point(aes(fill=tailindex, group=rep), pch=1, size=1, alpha=0.3, position = pd ) +
                 stat_summary(fun.y=mean, geom="point", shape=3, size=2, colour="black", stroke=1.5,
                              position=pd, show.legend=FALSE) +
                 scale_color_manual(name = "Treatment", values = c("blue", "darkgreen")) +
                 scale_fill_manual(name = "Treatment", values = c("lightblue", "green")) +
-                
                 facet_wrap(~tailindex , ncol=2)    +
                 
                 geom_text(data = d %>% group_by( memorypar, tailindex) %>%
@@ -475,7 +476,8 @@ server <- shinyServer(function(input, output   ) {
             
             #####################
             print(pr1 + labs(y=target, x = "Visit") + 
-                      ggtitle(paste0("N=",length(unique(d$rep))," patient profiles with the number of patient values at visit") ) +
+                      ggtitle(paste0("N=",length(unique(d$rep)),
+                                     " patient profiles with the number of patient values at visit") ) +
                       theme_bw() +
                       theme(legend.position="none") 
             )
@@ -489,250 +491,105 @@ server <- shinyServer(function(input, output   ) {
     output$reg.plot <- renderPlot({         
         
         
-        d <- make.data()$d
         
-        rangez <-    input$Whisker       # multiples of IQR length of whiskers, 0 means out to maximum
-        outliers <-  input$outliers   
-        dp<-         input$dp 
-        
-        ticks=c(log(0.001),log(0.01), log(.1), log(1), log(10), log(100), log(1000))
-        labs <- exp(ticks)
-        A <-seq(from=0.001, to= 0.01, by=0.001)
-        A<-1
-        B <-seq(from= 0.01, to= 0.1, by=0.01)
-        C <-seq(from=  0.1, to =1, by=.1)
-        D <-seq(from=    1, to =10, by=1)
-        E <-seq(from=    10, to =100, by=10)
-        FF <-seq(from=   100, to =1000, by=100)
-        
-        tickz <- unique(c(A,B,C,D,E,FF))
-        xlabz <- "Experimental Group"
-        ylab. <- "Response"
-        xlab. <- c(paste0("\nGroup 1\nn=",table(d$x)[1][[1]],""),
-                   paste0("\nGroup 2\nn=",table(d$x)[2][[1]],""),
-                   paste0("\nGroup 3\nn=",table(d$x)[3][[1]],"")   )
+        d <- make.data()$d1
         
         
-        par(mfrow=c(1,2))
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        boxplot(d$y ~ d$x, xaxt="n", yaxt="n", xlab=xlabz, ylab=ylab., 
-                outline=outliers,
-                col=terrain.colors(4) , range=rangez,
-                ylim=c(0,max(d$y)), main=paste("Presenting data on untransformed scale, N=", input$N) ) 
-        axis(1, at=1:3, labels=xlab., tick=FALSE)
-        axis(2,   las=2)
-        # grid(NA, NULL, col="cornsilk2", lty=6)
-        panel.first = 
-            c(grid(NA, NULL, col="cornsilk2", lty=6))
+        ####################################SINGLE PLOT
+       
+        i <- as.numeric(unlist(strsplit(input$vec1,",")))
+        
+        y <- sum(i)
+       
         
         
-        par(new=TRUE) #repeating
+        target <- input$Plot
         
-        boxplot(d$y ~ d$x, xaxt="n", yaxt="n", xlab=xlabz, ylab=ylab.,
-                outline=outliers,
-                col=terrain.colors(4) , range=rangez,
-                ylim=c(0,max(d$y)), main=paste("Presenting data on untransformed scale, N=", input$N) ) 
+        d <- d[d$test %in% target,]
+    
+      #  dd <- d[d$rep %in% i,]
         
-        if (dp==1) {
+        if(y>=999) {
             
-            # Add data points
-            mylevels <- levels(d$x)
-            levelProportions <- summary(d$x)/nrow(d)
-            for(i in 1:length(mylevels)){
-                
-                thislevel <- mylevels[i]
-                thisvalues <- d[d$x==thislevel, 'y']
-                
-                myjitter <- jitter(rep(i, length(thisvalues)), amount=levelProportions[i]/2)
-                points(myjitter, thisvalues, pch=20, col=rgb(0,0,0,.9))
-                
-            }
-            
-            
-        }
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        if (min(d$y)<0.1) {
-            
-            low=0.01
-            tickz <- unique(c( B,C,D,E,FF))
+            dd<-d
             
         } else {
-            low=0.1
-            tickz <- unique(c( C,D,E,FF))
-        }
-        
-        if (max(d$y)>100) {up=1000}  else {up=100}
-        
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        boxplot(d$logy ~ d$x, xaxt="n", yaxt="n", xlab=xlabz, ylab=ylab.,
-                outline=outliers,
-                col=terrain.colors(4) , range=rangez,
-                ylim=c(log(low),log(up)), main=paste("Presenting the same data; log the data with antilog scale, N=",input$N) )
-        axis(1, at=1:3, labels=xlab., tick=FALSE)
-        axis(2, at=ticks, labels=labs, las=2)
-        #abline(h=ticks, col="cornsilk2", lty=6)
-        
-        panel.first = 
-            c( abline(h=ticks, col="cornsilk2", lty=6))
-        
-        par(new=TRUE) #repeating so grid lines are ar back
-        boxplot(d$logy ~ d$x, xaxt="n", yaxt="n", xlab=xlabz, ylab=ylab.,
-                outline=outliers,
-                col=terrain.colors(4) , range=rangez,
-                ylim=c(log(low),log(up)), main=paste("Presenting the same data; log the data with antilog scale, N=",input$N) )
-        
-        
-        # rug(x = 1:3, ticksize = 0.01, side = 1)  #ticks above line
-        rug(x = log(tickz), ticksize = -0.01, side = 2)
-        if (dp==1) {
-            # Add data points
-            mylevels <- levels(d$x)
-            levelProportions <- summary(d$x)/nrow(d)
-            for(i in 1:length(mylevels)){
-                
-                thislevel <- mylevels[i]
-                thisvalues <- d[d$x==thislevel, 'logy']
-                
-                # take the x-axis indices and add a jitter, proportional to the N in each level
-                myjitter <- jitter(rep(i, length(thisvalues)), amount=levelProportions[i]/2)
-                points(myjitter, thisvalues, pch=20, col=rgb(0,0,0,.9))
-                #
-            }
             
+            dd <- d[d$rep %in% i,]
         }
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         
-    })
+        
+        sel <- unique(dd$tailindex)
+        
+        d <- d[d$tailindex %in% sel,]
+        
+        
+        pd <- position_dodge(.4)
+        pr1=NULL
+        pr1<-ggplot(d,aes(x=memorypar ,y=hillest,color=tailindex, fill=tailindex )) + 
+           # stat_boxplot(geom = "errorbar", width = 0.2) +
+            #stat_boxplot(geom='errorbar', linetype=1, width=0.5)+  #whiskers
+            geom_boxplot( outlier.colour = NA,alpha=0.1, color="lightblue",)  +  
+            # stat_boxplot(geom='errorbar', linetype=1, width=0.5)+  #whiskers
+            geom_boxplot(data = d,
+                         aes(x = memorypar, y = hillest,  fill = tailindex ),outlier.shape = NA  , alpha=.2 ) + 
+            
+            geom_line(data = dd,
+                      aes(group=rep,x = memorypar, y = hillest),  size = .6, linetype="dashed") +
+            
+            scale_size_manual( values = c( 1) ) +
+            # geom_point(aes(fill=tailindex, group=rep), pch=1, size=1, alpha=0.3, position = pd ) +
+            # stat_summary(fun.y=mean, geom="point", shape=3, size=2, colour="black", stroke=1.5,
+            #             position=pd, show.legend=FALSE) +
+            scale_color_manual(name = "Treatment", values = c("blue", "darkgreen") ) +
+            scale_fill_manual(name = "Treatment", values = c("lightblue", "green") ) +
+            
+            
+            facet_wrap(~tailindex , ncol=2)    +
+            
+            geom_text(data = dd %>% group_by( memorypar, tailindex) %>%
+                          summarise(Count = n()) %>%
+                          ungroup %>%
+                          mutate(hillest=min((d$hillest)) - 0.05 * diff(range((d$hillest)))),
+                      aes(label = paste0("n = ", Count)),
+                      position = pd, size=5, show.legend = FALSE) 
+        
+        #####################
+        print(pr1 + labs(y=target, x = "Visit") + 
+                  ggtitle(paste0("N=",length(unique(dd$rep))," patient profiles with the number of patient values at visit") ) +
+                  theme_bw() +
+                 # theme(legend.position="none")  +
+               
+                  
+              
+              theme(panel.background=element_blank(),
+                    # axis.text.y=element_blank(),
+                    # axis.ticks.y=element_blank(),
+                    # https://stackoverflow.com/questions/46482846/ggplot2-x-axis-extreme-right-tick-label-clipped-after-insetting-legend
+                    # stop axis being clipped
+                    plot.title=element_text(), plot.margin = unit(c(5.5,12,5.5,5.5), "pt"),
+                    legend.text=element_text(size=14),
+                    legend.title=element_text(size=14),
+                    legend.position="none",
+                    axis.text.x  = element_text(size=15),
+                    axis.text.y  = element_text(size=15),
+                    axis.line.x = element_line(color="black"),
+                    axis.line.y = element_line(color="black"),
+                    plot.caption=element_text(hjust = 0, size = 7),
+                    strip.text.x = element_text(size = 16, colour = "black", angle = 0),
+                    axis.title.y = element_text(size = rel(1.5), angle = 90),
+                    axis.title.x = element_text(size = rel(1.5), angle = 0),
+                    strip.background = element_rect(colour = "black", fill = "white")
+                    ) 
+        )
+        
+        
+    })   
     #---------------------------------------------------------------------------
     
     output$reg.plot2 <- renderPlot({         
         
-        d <- make.data2()$d
-        
-        rangez <-    input$Whisker       # multiples of IQR length of whiskers, 0 means out to maximum
-        # rangez <- make.data2()$rangez
-        
-        outliers <-  input$outliers   
-        dp<-         input$dp 
-        
-        A <-seq(from=0.001, to= 0.01, by=0.001)
-        B <-seq(from= 0.01, to= 0.1, by=0.01)
-        C <-seq(from=  0.1, to =1, by=.1)
-        D <-seq(from=    1, to =10, by=1)
-        E <-seq(from=    10, to =100, by=10)
-        FF <-seq(from=   100, to =1000, by=100)
-        
-        tickz <- unique(c(A,B,C,D,E,FF))
-        
-        ticks=c(log(c( 0.001, 0.01,  .1,  1,  10,  100,  1000)))
-        labs <- exp(ticks)
-        
-        ylab. <- " "
-        xlabz  <- "Response"
-        xlab. <- c("Group 1","Group 2","Group 3")
-        
-        par(mfrow=c(2,1))
-        
-        d$x=1   # change
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        bs <- (boxplot.stats(d$y,coef = rangez)$stats)[c(1,3,5)]
-        bs1 <-  (boxplot.stats(d$y,coef = rangez)$stats)[c(1,3,5)]
-        
-        bs0 <- (boxplot.stats(d$y,coef = rangez)$stats)[c(2,4)]
-        bs2 <-  (boxplot.stats(d$y,coef = rangez)$stats)[c(2,4)]
-        
-        boxplot(d$y ~ d$x, xaxt="n", yaxt="n", xlab=xlabz, ylab=ylab.,   horizontal = TRUE, axes = FALSE, staplewex = 1,
-                outline=outliers,
-                col=terrain.colors(4)[3] , range=rangez,  width=10,
-                ylim=c(0,max(d$y)*1.2), 
-                main=paste("Presenting the data with the boxplot statistics, top the raw untransformed scale, bottom log transforming the same data, with an antilog scale, N=", input$N,"\n"))
-        # axis(1, at=1:3, labels=xlab.)
-        axis(1,   las=1)
-        grid(  NULL, NA, col="cornsilk2", lty=7)
-        # abline(v=ticks, col="cornsilk2", lty=6)
-        text(x = p2(bs), labels = p2(bs1), y = 1.48)
-        text(x = p2(bs0), labels = p2(bs2), y =  .53)
-        par(new=TRUE) #repeating so grid lines are ar back
-        boxplot(d$y ~ d$x, xaxt="n", yaxt="n", xlab=xlabz, ylab=ylab.,   horizontal = TRUE, axes = FALSE, staplewex = 1,
-                outline=outliers,
-                col=terrain.colors(4)[3] , range=rangez,  width=10,
-                ylim=c(0,max(d$y)*1.2), 
-                main=paste("Presenting the data with the boxplot statistics, top the raw untransformed scale, bottom log transforming the same data, with an antilog scale, N=", input$N,"\n"))
-        
-        if (dp==1) {
-            cols <-  c(    "purple")
-            
-            # Add data points
-            mylevels <- 1
-            levelProportions <- .01 #summary(d$x)/nrow(d)
-            for(i in 1:length(mylevels)){
-                
-                thislevel <- mylevels[i]
-                thisvalues <- d[d$x==thislevel, 'y']
-                library(scales)
-                myjitter <- jitter(rep(i, length(thisvalues)), amount=levelProportions[i]*30)
-                points( thisvalues, myjitter, pch=1, col = alpha(cols, 0.8) )   
-                
-            }
-            
-        }
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        if (min(d$y)<0.1) {
-            
-            low=0.01
-            tickz <- unique(c( B,C,D,E,FF))
-            
-        } else {
-            low=0.1
-            tickz <- unique(c( C,D,E,FF))
-        }
-        
-        if (max(d$y)>100) {up=1000}  else {up=100}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        
-        bs <- (boxplot.stats(d$logy,coef = rangez)$stats)[c(1,3,5)]
-        bs1 <-  exp(boxplot.stats(d$logy,coef = rangez)$stats)[c(1,3,5)]
-        
-        bs0 <- (boxplot.stats(d$logy,coef = rangez)$stats)[c(2,4)]
-        bs2 <-  exp(boxplot.stats(d$logy,coef = rangez)$stats)[c(2,4)]
-        
-        boxplot(d$logy ~ d$x, xaxt="n", yaxt="n", xlab=xlabz, ylab=ylab., horizontal = TRUE, axes = FALSE, staplewex = 1,
-                outline=outliers,
-                col=terrain.colors(4) [3], range=rangez, width=10,
-                ylim=c(log(low),log(up))) 
-        axis(1, at=ticks, labels=labs, las=1)
-        abline(v=(ticks), col="cornsilk2", lty=7)
-        rug(x = log(tickz), ticksize = -0.02, side = 1)
-        # text(x = p2(bs), labels = p2(bs1), y = 1.48)
-        
-        text(x = p2(bs), labels = p2(bs1), y = 1.48)
-        text(x = p2(bs0), labels = p2(bs2), y =  .53)
-        
-        par(new=TRUE)
-        
-        boxplot(d$logy ~ d$x, xaxt="n", yaxt="n", xlab=xlabz, ylab=ylab., horizontal = TRUE, axes = FALSE, staplewex = 1,
-                outline=outliers,
-                col=terrain.colors(4) [3], range=rangez, width=10,
-                ylim=c(log(low),log(up))) 
-        
-        if (dp==1) {
-            cols <-  c(    "purple")
-            
-            # Add data points
-            mylevels <- 1
-            levelProportions <- summary(d$x)/nrow(d)
-            for(i in 1:length(mylevels)){
-                
-                thislevel <- mylevels[i]
-                thisvalues <- d[d$x==thislevel, 'logy']
-                
-                # take the x-axis indices and add a jitter, proportional to the N in each level
-                # myjitter <- jitter(rep(i, length(thisvalues)), amount=levelProportions[i]*30)
-                points( thisvalues, myjitter, pch=1, col = alpha(cols, 0.8) )   
-                #
-            }
-            
-        }
+       
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         
     })
@@ -742,7 +599,13 @@ server <- shinyServer(function(input, output   ) {
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
     output$table1 <- renderPrint({
         
-        return(make.data2()$d)
+        foo<- make.data()$d1
+        
+        foo$eij <- NULL 
+        
+        names(foo) <- c("heamatology test", "id", "visit", "trt","response")
+        
+        return(foo)
         
     })
     
@@ -750,63 +613,63 @@ server <- shinyServer(function(input, output   ) {
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     output$table2 <- renderPrint({
         
-        dd <-  make.data2()$d 
-        
-        rangez <-    input$Whisker 
-        
-        bs <- boxplot.stats(dd$y, coef = rangez, do.conf = FALSE, do.out = FALSE)$stats
-        bs <- as.numeric((as.vector(bs))) #p2
-        names(bs ) <- c("Lower whisker", "Lower ‘hinge’", "Median", "Upper ‘hinge’" ,"Upper whisker")
-        
-        return(  print(bs, row.names = FALSE)) 
+        # dd <-  make.data2()$d 
+        # 
+        # rangez <-    input$Whisker 
+        # 
+        # bs <- boxplot.stats(dd$y, coef = rangez, do.conf = FALSE, do.out = FALSE)$stats
+        # bs <- as.numeric((as.vector(bs))) #p2
+        # names(bs ) <- c("Lower whisker", "Lower ‘hinge’", "Median", "Upper ‘hinge’" ,"Upper whisker")
+        # 
+        # return(  print(bs, row.names = FALSE)) 
         
     })
     
     output$table3 <- renderPrint({
         
-        dd <-  make.data2()$d 
-        
-        f <- summary(dd$y)[c(2,3,5)]
-        f <- as.matrix(f);
-        #f <-p2(f)   # here
-        f <- as.numeric(f)
-        # f<-(p2(f))
-        f<-as.data.frame(t(f))
-        #    names(f ) <- c("Minimum", "1st.Quartile", "Median", "Mean", "3rd.Quartile", "Maximum")
-        names(f ) <- c( "1st.Quartile", "Median",  "3rd.Quartile")
-        
-        return( print(f, row.names = FALSE)) 
+        # dd <-  make.data2()$d 
+        # 
+        # f <- summary(dd$y)[c(2,3,5)]
+        # f <- as.matrix(f);
+        # #f <-p2(f)   # here
+        # f <- as.numeric(f)
+        # # f<-(p2(f))
+        # f<-as.data.frame(t(f))
+        # #    names(f ) <- c("Minimum", "1st.Quartile", "Median", "Mean", "3rd.Quartile", "Maximum")
+        # names(f ) <- c( "1st.Quartile", "Median",  "3rd.Quartile")
+        # 
+        # return( print(f, row.names = FALSE)) 
         
     })
     
     
     output$table4 <- renderPrint({
         
-        dd <-  make.data2()$d 
-        
-        rangez <-    input$Whisker 
-        
-        bs <- boxplot.stats(dd$logy, coef = rangez, do.conf = FALSE, do.out = FALSE)$stats
-        bs <- as.numeric((as.vector(exp(bs))))  #p2
-        names(bs ) <- c("Lower whisker", "Lower ‘hinge’", "Median", "Upper ‘hinge’" ,"Upper whisker")
-        
-        return(  print(bs, row.names = FALSE)) 
+        # dd <-  make.data2()$d 
+        # 
+        # rangez <-    input$Whisker 
+        # 
+        # bs <- boxplot.stats(dd$logy, coef = rangez, do.conf = FALSE, do.out = FALSE)$stats
+        # bs <- as.numeric((as.vector(exp(bs))))  #p2
+        # names(bs ) <- c("Lower whisker", "Lower ‘hinge’", "Median", "Upper ‘hinge’" ,"Upper whisker")
+        # 
+        # return(  print(bs, row.names = FALSE)) 
         
     })
     
     output$table5 <- renderPrint({
         
-        dd <-  make.data2()$d 
-        
-        f <- summary(dd$logy)[c(2,3,5)]
-        f <- as.matrix(f);
-        # f <-p2(f)
-        f <- exp(as.numeric(f))
-        #  f<-(p2(f))
-        f<-as.data.frame(t(f))
-        # names(f ) <- c("Minimum", "1st.Quartile", "Median", "Mean", "3rd.Quartile", "Maximum")
-        names(f ) <- c( "1st.Quartile", "Median",  "3rd.Quartile")
-        return( print(f, row.names = FALSE)) 
+        # dd <-  make.data2()$d 
+        # 
+        # f <- summary(dd$logy)[c(2,3,5)]
+        # f <- as.matrix(f);
+        # # f <-p2(f)
+        # f <- exp(as.numeric(f))
+        # #  f<-(p2(f))
+        # f<-as.data.frame(t(f))
+        # # names(f ) <- c("Minimum", "1st.Quartile", "Median", "Mean", "3rd.Quartile", "Maximum")
+        # names(f ) <- c( "1st.Quartile", "Median",  "3rd.Quartile")
+        # return( print(f, row.names = FALSE)) 
         
     })
     
