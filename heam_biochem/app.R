@@ -128,6 +128,7 @@ ui <- fluidPage(theme = shinytheme("journal"),
                                         strong("Select plot preference "),
                                         choices=biochemistry),
                             
+                            textInput('vec1', 'Enter sample id (comma delimited)', "1,2,3,4"),
                             
                             sliderInput("N",
                                         "Select the total number of data points",
@@ -184,7 +185,7 @@ ui <- fluidPage(theme = shinytheme("journal"),
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~end of section to add colour     
                             tabPanel("Plotting the data", 
                                      
-                                     div(plotOutput("reg.plot3", width=fig.width, height=fig.height)),  
+                                     div(plotOutput("reg.plot", width=fig.width, height=fig.height)),  
                                      
                                      
                                      h3("Figure 1 Left panel untransformed data, right panel natural log transformation labelled with antilogs"),
@@ -416,7 +417,7 @@ server <- shinyServer(function(input, output   ) {
         
         
           
-        return(list(d=d, d1=d1))# rangez=rangez, outliers=outliers, n=n, dp=dp))
+        return(list(  d1=d1))# rangez=rangez, outliers=outliers, n=n, dp=dp))
         
         
     })
@@ -489,250 +490,70 @@ server <- shinyServer(function(input, output   ) {
     output$reg.plot <- renderPlot({         
         
         
-        d <- make.data()$d
         
-        rangez <-    input$Whisker       # multiples of IQR length of whiskers, 0 means out to maximum
-        outliers <-  input$outliers   
-        dp<-         input$dp 
-        
-        ticks=c(log(0.001),log(0.01), log(.1), log(1), log(10), log(100), log(1000))
-        labs <- exp(ticks)
-        A <-seq(from=0.001, to= 0.01, by=0.001)
-        A<-1
-        B <-seq(from= 0.01, to= 0.1, by=0.01)
-        C <-seq(from=  0.1, to =1, by=.1)
-        D <-seq(from=    1, to =10, by=1)
-        E <-seq(from=    10, to =100, by=10)
-        FF <-seq(from=   100, to =1000, by=100)
-        
-        tickz <- unique(c(A,B,C,D,E,FF))
-        xlabz <- "Experimental Group"
-        ylab. <- "Response"
-        xlab. <- c(paste0("\nGroup 1\nn=",table(d$x)[1][[1]],""),
-                   paste0("\nGroup 2\nn=",table(d$x)[2][[1]],""),
-                   paste0("\nGroup 3\nn=",table(d$x)[3][[1]],"")   )
+        d <- make.data()$d1
         
         
-        par(mfrow=c(1,2))
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        boxplot(d$y ~ d$x, xaxt="n", yaxt="n", xlab=xlabz, ylab=ylab., 
-                outline=outliers,
-                col=terrain.colors(4) , range=rangez,
-                ylim=c(0,max(d$y)), main=paste("Presenting data on untransformed scale, N=", input$N) ) 
-        axis(1, at=1:3, labels=xlab., tick=FALSE)
-        axis(2,   las=2)
-        # grid(NA, NULL, col="cornsilk2", lty=6)
-        panel.first = 
-            c(grid(NA, NULL, col="cornsilk2", lty=6))
+        ####################################SINGLE PLOT
+       
+        i <- as.numeric(unlist(strsplit(input$vec1,",")))
+       
+        target <- input$Plot
+        
+        d <- d[d$test %in% target,]
+    
+        dd <- d[d$rep %in% i,]
+        
+        sel <- unique(dd$tailindex)
+        
+        d <- d[d$tailindex %in% sel,]
         
         
-        par(new=TRUE) #repeating
-        
-        boxplot(d$y ~ d$x, xaxt="n", yaxt="n", xlab=xlabz, ylab=ylab.,
-                outline=outliers,
-                col=terrain.colors(4) , range=rangez,
-                ylim=c(0,max(d$y)), main=paste("Presenting data on untransformed scale, N=", input$N) ) 
-        
-        if (dp==1) {
+        pd <- position_dodge(.4)
+        pr1=NULL
+        pr1<-ggplot(d,aes(x=memorypar ,y=hillest,color=tailindex, fill=tailindex )) + 
+            #stat_boxplot(geom = "errorbar", width = 0.3) +
+            geom_boxplot( outlier.colour = NA,alpha=0.1, color="lightblue",)  +  
+            geom_boxplot(data = d,
+                         aes(x = memorypar, y = hillest,  fill = tailindex ),outlier.shape = NA  , alpha=.2 ) + 
             
-            # Add data points
-            mylevels <- levels(d$x)
-            levelProportions <- summary(d$x)/nrow(d)
-            for(i in 1:length(mylevels)){
-                
-                thislevel <- mylevels[i]
-                thisvalues <- d[d$x==thislevel, 'y']
-                
-                myjitter <- jitter(rep(i, length(thisvalues)), amount=levelProportions[i]/2)
-                points(myjitter, thisvalues, pch=20, col=rgb(0,0,0,.9))
-                
-            }
+            # facet_wrap(~tailindex , ncol=2)    +
+            geom_line(data = dd,
+                      aes(group=rep,x = memorypar, y = hillest),  size = .6, linetype="dashed") +
+            
+            scale_size_manual( values = c( 1) ) +
+            # geom_point(aes(fill=tailindex, group=rep), pch=1, size=1, alpha=0.3, position = pd ) +
+            # stat_summary(fun.y=mean, geom="point", shape=3, size=2, colour="black", stroke=1.5,
+            #             position=pd, show.legend=FALSE) +
+            scale_color_manual(name = "Treatment", values = c("blue", "darkgreen") ) +
+            scale_fill_manual(name = "Treatment", values = c("lightblue", "green") ) +
             
             
-        }
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        if (min(d$y)<0.1) {
+            facet_wrap(~tailindex , ncol=2)    +
             
-            low=0.01
-            tickz <- unique(c( B,C,D,E,FF))
-            
-        } else {
-            low=0.1
-            tickz <- unique(c( C,D,E,FF))
-        }
+            geom_text(data = dd %>% group_by( memorypar, tailindex) %>%
+                          summarise(Count = n()) %>%
+                          ungroup %>%
+                          mutate(hillest=min((d$hillest)) - 0.05 * diff(range((d$hillest)))),
+                      aes(label = paste0("n = ", Count)),
+                      position = pd, size=3, show.legend = FALSE) 
         
-        if (max(d$y)>100) {up=1000}  else {up=100}
-        
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        boxplot(d$logy ~ d$x, xaxt="n", yaxt="n", xlab=xlabz, ylab=ylab.,
-                outline=outliers,
-                col=terrain.colors(4) , range=rangez,
-                ylim=c(log(low),log(up)), main=paste("Presenting the same data; log the data with antilog scale, N=",input$N) )
-        axis(1, at=1:3, labels=xlab., tick=FALSE)
-        axis(2, at=ticks, labels=labs, las=2)
-        #abline(h=ticks, col="cornsilk2", lty=6)
-        
-        panel.first = 
-            c( abline(h=ticks, col="cornsilk2", lty=6))
-        
-        par(new=TRUE) #repeating so grid lines are ar back
-        boxplot(d$logy ~ d$x, xaxt="n", yaxt="n", xlab=xlabz, ylab=ylab.,
-                outline=outliers,
-                col=terrain.colors(4) , range=rangez,
-                ylim=c(log(low),log(up)), main=paste("Presenting the same data; log the data with antilog scale, N=",input$N) )
+        #####################
+        print(pr1 + labs(y=target, x = "Visit") + 
+                  ggtitle(paste0("N=",length(unique(dd$rep))," patient profiles with the number of patient values at visit") ) +
+                  theme_bw() +
+                  theme(legend.position="none") 
+        )
         
         
-        # rug(x = 1:3, ticksize = 0.01, side = 1)  #ticks above line
-        rug(x = log(tickz), ticksize = -0.01, side = 2)
-        if (dp==1) {
-            # Add data points
-            mylevels <- levels(d$x)
-            levelProportions <- summary(d$x)/nrow(d)
-            for(i in 1:length(mylevels)){
-                
-                thislevel <- mylevels[i]
-                thisvalues <- d[d$x==thislevel, 'logy']
-                
-                # take the x-axis indices and add a jitter, proportional to the N in each level
-                myjitter <- jitter(rep(i, length(thisvalues)), amount=levelProportions[i]/2)
-                points(myjitter, thisvalues, pch=20, col=rgb(0,0,0,.9))
-                #
-            }
-            
-        }
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         
-    })
+        
+    })  
     #---------------------------------------------------------------------------
     
     output$reg.plot2 <- renderPlot({         
         
-        d <- make.data2()$d
-        
-        rangez <-    input$Whisker       # multiples of IQR length of whiskers, 0 means out to maximum
-        # rangez <- make.data2()$rangez
-        
-        outliers <-  input$outliers   
-        dp<-         input$dp 
-        
-        A <-seq(from=0.001, to= 0.01, by=0.001)
-        B <-seq(from= 0.01, to= 0.1, by=0.01)
-        C <-seq(from=  0.1, to =1, by=.1)
-        D <-seq(from=    1, to =10, by=1)
-        E <-seq(from=    10, to =100, by=10)
-        FF <-seq(from=   100, to =1000, by=100)
-        
-        tickz <- unique(c(A,B,C,D,E,FF))
-        
-        ticks=c(log(c( 0.001, 0.01,  .1,  1,  10,  100,  1000)))
-        labs <- exp(ticks)
-        
-        ylab. <- " "
-        xlabz  <- "Response"
-        xlab. <- c("Group 1","Group 2","Group 3")
-        
-        par(mfrow=c(2,1))
-        
-        d$x=1   # change
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        bs <- (boxplot.stats(d$y,coef = rangez)$stats)[c(1,3,5)]
-        bs1 <-  (boxplot.stats(d$y,coef = rangez)$stats)[c(1,3,5)]
-        
-        bs0 <- (boxplot.stats(d$y,coef = rangez)$stats)[c(2,4)]
-        bs2 <-  (boxplot.stats(d$y,coef = rangez)$stats)[c(2,4)]
-        
-        boxplot(d$y ~ d$x, xaxt="n", yaxt="n", xlab=xlabz, ylab=ylab.,   horizontal = TRUE, axes = FALSE, staplewex = 1,
-                outline=outliers,
-                col=terrain.colors(4)[3] , range=rangez,  width=10,
-                ylim=c(0,max(d$y)*1.2), 
-                main=paste("Presenting the data with the boxplot statistics, top the raw untransformed scale, bottom log transforming the same data, with an antilog scale, N=", input$N,"\n"))
-        # axis(1, at=1:3, labels=xlab.)
-        axis(1,   las=1)
-        grid(  NULL, NA, col="cornsilk2", lty=7)
-        # abline(v=ticks, col="cornsilk2", lty=6)
-        text(x = p2(bs), labels = p2(bs1), y = 1.48)
-        text(x = p2(bs0), labels = p2(bs2), y =  .53)
-        par(new=TRUE) #repeating so grid lines are ar back
-        boxplot(d$y ~ d$x, xaxt="n", yaxt="n", xlab=xlabz, ylab=ylab.,   horizontal = TRUE, axes = FALSE, staplewex = 1,
-                outline=outliers,
-                col=terrain.colors(4)[3] , range=rangez,  width=10,
-                ylim=c(0,max(d$y)*1.2), 
-                main=paste("Presenting the data with the boxplot statistics, top the raw untransformed scale, bottom log transforming the same data, with an antilog scale, N=", input$N,"\n"))
-        
-        if (dp==1) {
-            cols <-  c(    "purple")
-            
-            # Add data points
-            mylevels <- 1
-            levelProportions <- .01 #summary(d$x)/nrow(d)
-            for(i in 1:length(mylevels)){
-                
-                thislevel <- mylevels[i]
-                thisvalues <- d[d$x==thislevel, 'y']
-                library(scales)
-                myjitter <- jitter(rep(i, length(thisvalues)), amount=levelProportions[i]*30)
-                points( thisvalues, myjitter, pch=1, col = alpha(cols, 0.8) )   
-                
-            }
-            
-        }
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        if (min(d$y)<0.1) {
-            
-            low=0.01
-            tickz <- unique(c( B,C,D,E,FF))
-            
-        } else {
-            low=0.1
-            tickz <- unique(c( C,D,E,FF))
-        }
-        
-        if (max(d$y)>100) {up=1000}  else {up=100}
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        
-        bs <- (boxplot.stats(d$logy,coef = rangez)$stats)[c(1,3,5)]
-        bs1 <-  exp(boxplot.stats(d$logy,coef = rangez)$stats)[c(1,3,5)]
-        
-        bs0 <- (boxplot.stats(d$logy,coef = rangez)$stats)[c(2,4)]
-        bs2 <-  exp(boxplot.stats(d$logy,coef = rangez)$stats)[c(2,4)]
-        
-        boxplot(d$logy ~ d$x, xaxt="n", yaxt="n", xlab=xlabz, ylab=ylab., horizontal = TRUE, axes = FALSE, staplewex = 1,
-                outline=outliers,
-                col=terrain.colors(4) [3], range=rangez, width=10,
-                ylim=c(log(low),log(up))) 
-        axis(1, at=ticks, labels=labs, las=1)
-        abline(v=(ticks), col="cornsilk2", lty=7)
-        rug(x = log(tickz), ticksize = -0.02, side = 1)
-        # text(x = p2(bs), labels = p2(bs1), y = 1.48)
-        
-        text(x = p2(bs), labels = p2(bs1), y = 1.48)
-        text(x = p2(bs0), labels = p2(bs2), y =  .53)
-        
-        par(new=TRUE)
-        
-        boxplot(d$logy ~ d$x, xaxt="n", yaxt="n", xlab=xlabz, ylab=ylab., horizontal = TRUE, axes = FALSE, staplewex = 1,
-                outline=outliers,
-                col=terrain.colors(4) [3], range=rangez, width=10,
-                ylim=c(log(low),log(up))) 
-        
-        if (dp==1) {
-            cols <-  c(    "purple")
-            
-            # Add data points
-            mylevels <- 1
-            levelProportions <- summary(d$x)/nrow(d)
-            for(i in 1:length(mylevels)){
-                
-                thislevel <- mylevels[i]
-                thisvalues <- d[d$x==thislevel, 'logy']
-                
-                # take the x-axis indices and add a jitter, proportional to the N in each level
-                # myjitter <- jitter(rep(i, length(thisvalues)), amount=levelProportions[i]*30)
-                points( thisvalues, myjitter, pch=1, col = alpha(cols, 0.8) )   
-                #
-            }
-            
-        }
+       
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         
     })
