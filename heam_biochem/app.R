@@ -747,11 +747,16 @@ server <- shinyServer(function(input, output   ) {
                     require(lattice)
 
                     lattice.options(panel.error=NULL)
+                    
+                    colnames(d)[colnames(d)=="hillest"] <- "value"
+                     
+                    colnames(d)[colnames(d)=="memorypar"] <- "Visit"
+                     
 
-                    xyplot(hillest ~ memorypar | test,
+                    xyplot(value ~ Visit | test,
+                           par.strip.text=list(cex=.7),
                            group = test, data = d,
-                           type = c( "p"),
-                           scales = "free")
+                             type = c("p" ),  scales = "free") 
 
                }
                
