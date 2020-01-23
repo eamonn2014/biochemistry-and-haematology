@@ -127,6 +127,10 @@ ui <- fluidPage(theme = shinytheme("journal"),
                  Another sample can be taken from the same data generating mechanism by clicking 'Simulate a new sample'.")),
                             br(),
                             
+                            selectInput("Plot1",
+                                        strong("Select plot preference "),
+                                        choices=c("Overall","Individual")),
+                            
                             selectInput("Plot",
                                         strong("Select plot preference "),
                                         choices=biochemistry),
@@ -188,7 +192,7 @@ ui <- fluidPage(theme = shinytheme("journal"),
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~end of section to add colour     
                             tabPanel("Plotting the data", 
                                      
-                                     div(plotOutput("reg.plot", width=fig.width, height=fig.height)),  
+                                     div(plotOutput("reg.plot3", width=fig.width, height=fig.height)),  
                                      
                                      
                                      h3("Figure 1 Left panel untransformed data, right panel natural log transformation labelled with antilogs"),
@@ -296,14 +300,7 @@ server <- shinyServer(function(input, output   ) {
     make.data <- reactive({
         
         sample <- random.sample()
-        # n<-  sample$n  
-        # 
-        # y <- rlnorm(n, .7, 1.5) 
-        # x <- factor(sample(3, length(y), repl = TRUE))
-        # 
-        # d <- data.frame(x=x, y=y)
-        # d$logy <- log(d$y) # log the data
-        # 
+        
         is.even <- function(x){ x %% 2 == 0 }
         
         mdata <- function( n,beta0, beta1, beta2, ar.val, sigma, tau0, tau1, tau01, m ) {
@@ -408,8 +405,6 @@ server <- shinyServer(function(input, output   ) {
                                   df15=df15, df16=df16,df17=df17, df18=df18, df19=df19, df20=df20,
                                   df21=df21,df22=df22, df23=df23, df24=df24))
 
-
-
         colnames(d1)[colnames(d1)=="yij"] <- "hillest"
         colnames(d1)[colnames(d1)=="trt"] <- "tailindex"
         colnames(d1)[colnames(d1)=="obs"] <- "memorypar"
@@ -417,9 +412,7 @@ server <- shinyServer(function(input, output   ) {
         d1$memorypar <- factor(d1$memorypar)
         d1$tailindex <- factor(d1$tailindex)
         d1$tailindex <- ifelse(d1$tailindex %in% 1, "Active","Placebo" )
-        
-        
-          
+           
         return(list(  d1=d1))# rangez=rangez, outliers=outliers, n=n, dp=dp))
         
         
@@ -446,9 +439,14 @@ server <- shinyServer(function(input, output   ) {
     
            output$reg.plot3 <- renderPlot({         
             
+               d <- make.data()$d1
+               
+               if (input$Plot1 == "Overall") {
+                   
+            
             target <- input$Plot
             
-            d <- make.data()$d1
+        
              
             d <- d[d$test %in% target,]
             
@@ -484,32 +482,115 @@ server <- shinyServer(function(input, output   ) {
            
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             
+            
+               } else {
+                   
+                   
+                   # d <- make.data()$d1
+                   ####################################SINGLE PLOT
+                   
+                   i <- as.numeric(unlist(strsplit(input$vec1,",")))
+                   y <- sum(i)
+                   target <- input$Plot
+                   
+                   d <- d[d$test %in% target,]
+                   
+                   #  if 999 is entered all subjects are shown
+                   
+                   if(y=="999") {
+                       
+                       dd<-d
+                       
+                   } else {
+                       
+                       dd <- d[d$rep %in% i,]
+                   }
+                   
+                   sel <- unique(dd$tailindex) #if only one arm , dont show the empty arm
+                   d <- d[d$tailindex %in% sel,]
+                   
+                   
+                   pd <- position_dodge(.4)
+                   pr1=NULL
+                   pr1<-ggplot(d,aes(x=memorypar ,y=hillest,color=tailindex, fill=tailindex )) + 
+                       # stat_boxplot(geom = "errorbar", width = 0.2) +
+                       #stat_boxplot(geom='errorbar', linetype=1, width=0.5)+  #whiskers
+                       geom_boxplot( outlier.colour = NA,alpha=0.1, color="lightblue",)  +  
+                       #   stat_boxplot(geom='errorbar', linetype=1, width=0.5)+  #whiskers
+                       geom_boxplot(data = d,
+                                    aes(x = memorypar, y = hillest,  fill = tailindex ),outlier.shape = NA  , alpha=.2 ) + 
+                       
+                       geom_line(data = dd,
+                                 aes(group=rep,x = memorypar, y = hillest),  size = .6, linetype="dashed") +
+                       
+                       scale_size_manual( values = c( 1) ) +
+                       # geom_point(aes(fill=tailindex, group=rep), pch=1, size=1, alpha=0.3, position = pd ) +
+                       # stat_summary(fun.y=mean, geom="point", shape=3, size=2, colour="black", stroke=1.5,
+                       #             position=pd, show.legend=FALSE) +
+                       scale_color_manual(name = "Treatment", values = c("blue", "darkgreen") ) +
+                       scale_fill_manual(name = "Treatment", values = c("lightblue", "green") ) +
+                       
+                       
+                       facet_wrap(~tailindex , ncol=2)    +
+                       
+                       geom_text(data = dd %>% group_by( memorypar, tailindex) %>%
+                                     summarise(Count = n()) %>%
+                                     ungroup %>%
+                                     mutate(hillest=min((d$hillest)) - 0.05 * diff(range((d$hillest)))),
+                                 aes(label = paste0("n = ", Count)),
+                                 position = pd, size=5, show.legend = FALSE) 
+                   
+                   #####################
+                   print(pr1 + labs(y=target, x = "Visit") + 
+                             ggtitle(paste0("N=",length(unique(dd$rep))," patient profiles with the number of patient values at visit") ) +
+                             theme_bw() +
+                             # theme(legend.position="none")  +
+                             
+                             
+                             
+                             theme(panel.background=element_blank(),
+                                   # axis.text.y=element_blank(),
+                                   # axis.ticks.y=element_blank(),
+                                   # https://stackoverflow.com/questions/46482846/ggplot2-x-axis-extreme-right-tick-label-clipped-after-insetting-legend
+                                   # stop axis being clipped
+                                   plot.title=element_text(), plot.margin = unit(c(5.5,12,5.5,5.5), "pt"),
+                                   legend.text=element_text(size=14),
+                                   legend.title=element_text(size=14),
+                                   legend.position="none",
+                                   axis.text.x  = element_text(size=15),
+                                   axis.text.y  = element_text(size=15),
+                                   axis.line.x = element_line(color="black"),
+                                   axis.line.y = element_line(color="black"),
+                                   plot.caption=element_text(hjust = 0, size = 7),
+                                   strip.text.x = element_text(size = 16, colour = "black", angle = 0),
+                                   axis.title.y = element_text(size = rel(1.5), angle = 90),
+                                   axis.title.x = element_text(size = rel(1.5), angle = 0),
+                                   strip.background = element_rect(colour = "black", fill = "white")
+                             ) 
+                   )
+                   
+               }
+            
+            
+            
         })
     
-    # Plot a scatter of the data  
+    # Plot a scatter of the data  with selection of individual patients
     
     output$reg.plot <- renderPlot({         
-        
-        
-        
-        d <- make.data()$d1
-        
-        
+         
+       # d <- make.data()$d1
         ####################################SINGLE PLOT
        
         i <- as.numeric(unlist(strsplit(input$vec1,",")))
-        
         y <- sum(i)
-       
-        
-        
         target <- input$Plot
         
         d <- d[d$test %in% target,]
     
-      #  dd <- d[d$rep %in% i,]
+      #  if 999 is entered all subjects are shown
         
-        if(y>=999) {
+        if(y=="999") {
             
             dd<-d
             
@@ -518,9 +599,7 @@ server <- shinyServer(function(input, output   ) {
             dd <- d[d$rep %in% i,]
         }
         
-        
-        sel <- unique(dd$tailindex)
-        
+        sel <- unique(dd$tailindex) #if only one arm , dont show the empty arm
         d <- d[d$tailindex %in% sel,]
         
         
@@ -530,7 +609,7 @@ server <- shinyServer(function(input, output   ) {
            # stat_boxplot(geom = "errorbar", width = 0.2) +
             #stat_boxplot(geom='errorbar', linetype=1, width=0.5)+  #whiskers
             geom_boxplot( outlier.colour = NA,alpha=0.1, color="lightblue",)  +  
-            stat_boxplot(geom='errorbar', linetype=1, width=0.5)+  #whiskers
+         #   stat_boxplot(geom='errorbar', linetype=1, width=0.5)+  #whiskers
             geom_boxplot(data = d,
                          aes(x = memorypar, y = hillest,  fill = tailindex ),outlier.shape = NA  , alpha=.2 ) + 
             
