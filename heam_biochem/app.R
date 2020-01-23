@@ -131,7 +131,11 @@ ui <- fluidPage(theme = shinytheme("journal"),
                                         strong("Select plot preference "),
                                         choices=biochemistry),
                             
+<<<<<<< HEAD
                             textInput('vec1', 'Enter sample id (comma delimited), enter 999 to show all profiles', "1,2,3,4"),
+=======
+                            textInput('vec1', 'Enter sample id (comma delimited)', "1,2,3,4"),
+>>>>>>> be2550638ac354e5350687a21b034b946893e5f5
                             
                             sliderInput("N",
                                         "Select the total number of data points",
@@ -491,6 +495,7 @@ server <- shinyServer(function(input, output   ) {
     output$reg.plot <- renderPlot({         
         
         
+<<<<<<< HEAD
         
         d <- make.data()$d1
         
@@ -547,17 +552,65 @@ server <- shinyServer(function(input, output   ) {
             
             facet_wrap(~tailindex , ncol=2)    +
             
+=======
+        
+        d <- make.data()$d1
+        
+        
+        ####################################SINGLE PLOT
+       
+        i <- as.numeric(unlist(strsplit(input$vec1,",")))
+       
+        target <- input$Plot
+        
+        d <- d[d$test %in% target,]
+    
+        dd <- d[d$rep %in% i,]
+        
+        sel <- unique(dd$tailindex)
+        
+        d <- d[d$tailindex %in% sel,]
+        
+        
+        pd <- position_dodge(.4)
+        pr1=NULL
+        pr1<-ggplot(d,aes(x=memorypar ,y=hillest,color=tailindex, fill=tailindex )) + 
+            #stat_boxplot(geom = "errorbar", width = 0.3) +
+            geom_boxplot( outlier.colour = NA,alpha=0.1, color="lightblue",)  +  
+            geom_boxplot(data = d,
+                         aes(x = memorypar, y = hillest,  fill = tailindex ),outlier.shape = NA  , alpha=.2 ) + 
+            
+            # facet_wrap(~tailindex , ncol=2)    +
+            geom_line(data = dd,
+                      aes(group=rep,x = memorypar, y = hillest),  size = .6, linetype="dashed") +
+            
+            scale_size_manual( values = c( 1) ) +
+            # geom_point(aes(fill=tailindex, group=rep), pch=1, size=1, alpha=0.3, position = pd ) +
+            # stat_summary(fun.y=mean, geom="point", shape=3, size=2, colour="black", stroke=1.5,
+            #             position=pd, show.legend=FALSE) +
+            scale_color_manual(name = "Treatment", values = c("blue", "darkgreen") ) +
+            scale_fill_manual(name = "Treatment", values = c("lightblue", "green") ) +
+            
+            
+            facet_wrap(~tailindex , ncol=2)    +
+            
+>>>>>>> be2550638ac354e5350687a21b034b946893e5f5
             geom_text(data = dd %>% group_by( memorypar, tailindex) %>%
                           summarise(Count = n()) %>%
                           ungroup %>%
                           mutate(hillest=min((d$hillest)) - 0.05 * diff(range((d$hillest)))),
                       aes(label = paste0("n = ", Count)),
+<<<<<<< HEAD
                       position = pd, size=5, show.legend = FALSE) 
+=======
+                      position = pd, size=3, show.legend = FALSE) 
+>>>>>>> be2550638ac354e5350687a21b034b946893e5f5
         
         #####################
         print(pr1 + labs(y=target, x = "Visit") + 
                   ggtitle(paste0("N=",length(unique(dd$rep))," patient profiles with the number of patient values at visit") ) +
                   theme_bw() +
+<<<<<<< HEAD
                  # theme(legend.position="none")  +
                
                   
@@ -585,6 +638,15 @@ server <- shinyServer(function(input, output   ) {
         
         
     })   
+=======
+                  theme(legend.position="none") 
+        )
+        
+        
+        
+        
+    })  
+>>>>>>> be2550638ac354e5350687a21b034b946893e5f5
     #---------------------------------------------------------------------------
     
     output$reg.plot2 <- renderPlot({         
