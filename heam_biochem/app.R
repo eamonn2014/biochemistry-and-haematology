@@ -530,7 +530,7 @@ server <- shinyServer(function(input, output   ) {
            # stat_boxplot(geom = "errorbar", width = 0.2) +
             #stat_boxplot(geom='errorbar', linetype=1, width=0.5)+  #whiskers
             geom_boxplot( outlier.colour = NA,alpha=0.1, color="lightblue",)  +  
-            # stat_boxplot(geom='errorbar', linetype=1, width=0.5)+  #whiskers
+            stat_boxplot(geom='errorbar', linetype=1, width=0.5)+  #whiskers
             geom_boxplot(data = d,
                          aes(x = memorypar, y = hillest,  fill = tailindex ),outlier.shape = NA  , alpha=.2 ) + 
             
