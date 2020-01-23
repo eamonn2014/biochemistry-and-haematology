@@ -129,13 +129,23 @@ ui <- fluidPage(theme = shinytheme("journal"),
                             
                             selectInput("Plot1",
                                         strong("Select plot preference "),
-                                        choices=c("Overall","Individual")),
+                                        choices=c("Overall","Individual","Individual all tests")),
                             
                             selectInput("Plot",
                                         strong("Select plot preference "),
                                         choices=biochemistry),
                             
                             textInput('vec1', "Select plot preference 'Individual' and enter sample ID(s) (comma delimited), enter 999 to show all profiles", "1,2,3,4"),
+                            
+                            
+                            sliderInput("V",
+                                        "Maximum visit number",
+                                        min=3, max=10, step=1, value=8, ticks=FALSE),
+                            
+                            sliderInput("VV",
+                                        "Estimate trt effect at this visit",
+                                        min=1, max=10, step=1, value=4, ticks=FALSE),
+                            
                             
                             sliderInput("N",
                                         "Select the total number of data points",
@@ -216,58 +226,75 @@ ui <- fluidPage(theme = shinytheme("journal"),
                                      
                             ) ,
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                            tabPanel("Wait...what? Aren't the whiskers different?", value=3, 
-                                     div(plotOutput("reg.plot2", width=fig.width, height=fig.height)),  
-                                     h3("Figure 2 Top panel untransformed data, bottom panel using a natural log transformation"),
+                            tabPanel("Modelling", value=3, 
+                                     # div(plotOutput("reg.plot2", width=fig.width, height=fig.height)),  
+                                     # h3("Figure 2 Top panel untransformed data, bottom panel using a natural log transformation"),
+                                     # 
+                                     # h4("Lets first look at the relationship between the hinges vrs. quartiles.") ,
+                                     # p(strong("Boxplot stats for the untransformed data, as presented in the top panel:")) ,
+                                     # div( verbatimTextOutput("table2")),
+                                     # p(strong("Now summarise the same data. Q1 and Q3 may not match the hinges. Paraphrasing the 'box.plot.stats' help file...'The ‘hinges’ are versions of Q1 and Q3'. See what happens when n is odd. The hinges and the quartiles match.")) ,
+                                     # div( verbatimTextOutput("table3")),
+                                     # 
+                                     # p(strong("Now check out the boxplot stats based on the log transformed data, after exponentiating (bottom panel), check with the raw median:")) ,
+                                     # div( verbatimTextOutput("table4")),
+                                     # p(strong("In the same way summarise the log transformed data then exponentiating: ")) ,
+                                     # div( verbatimTextOutput("table5")),
                                      
-                                     h4("Lets first look at the relationship between the hinges vrs. quartiles.") ,
-                                     p(strong("Boxplot stats for the untransformed data, as presented in the top panel:")) ,
-                                     div( verbatimTextOutput("table2")),
-                                     p(strong("Now summarise the same data. Q1 and Q3 may not match the hinges. Paraphrasing the 'box.plot.stats' help file...'The ‘hinges’ are versions of Q1 and Q3'. See what happens when n is odd. The hinges and the quartiles match.")) ,
-                                     div( verbatimTextOutput("table3")),
+                                     # p(strong("Use Harrell's rms function 'contrast' to estimate the treatment effect at desired visit by selecting 'What timepoint to estimate trt B- trt A?:'")),
+                                     # div(class="span7", verbatimTextOutput("reg.summary4")),
+                                     p(strong("GLS model fit, visit is using the selected reference level, so simply we can read off the treatment effect directly from the model output for the visit estimate.")),
+                                     div(class="span7", verbatimTextOutput("reg.summary2")),
                                      
-                                     p(strong("Now check out the boxplot stats based on the log transformed data, after exponentiating (bottom panel), check with the raw median:")) ,
-                                     div( verbatimTextOutput("table4")),
-                                     p(strong("In the same way summarise the log transformed data then exponentiating: ")) ,
-                                     div( verbatimTextOutput("table5")),
-                                     
-                                     h4("Look again at how to calculate the boxplot statistics when transforming") ,
-                                     
-                                     p(strong("The length of the whiskers is typically set at 1.5xIQR, that is, the 
-                 whiskers extend to the most extreme data point which is no more than 1.5 times the interquartile 
-                 range from the box. A value of zero, using the R function, causes the whiskers to extend to the data extremes. 
-                          So it may not be as simple as saying the whiskers extend 1.5xIQR.")),
-                                     
-                                     
-                                     div(""),
-                                     
-                                     p(strong("To summarise, apply the whisker calculation rule on the scale used to draw the boxplot. Therefore when using a transformation 
-                 the calculations must 
-                 be on the transformed scale. Do not mix scales. So, do not calculate the whiskers based on the 1.5xIQR rule
-                 on the raw scale and then log transform 
-                          to present the boxplot.  
-                          The median and hinges will be the logs of the original median and hinges, they will match with odd sample sizes, but not generally with even. 
-                          The step which determines the length of the whiskers will change. Hence the fences generally will differ. 
-                          (The location of the end of the whiskers is referred to as the fences). ")) ,
-                                     
-                                     
-                                     p(strong("")),
-                                     h3("Take home messages; when the sample size is even, the hinges may not necessarily equal Q1 and Q3 (raw and transformed) and the transformed median may be slightly different to the raw median.
-                      The fences may not necessarily equal the fences on the raw scale for any sample size.
-                    Explicitly state how you constructed your boxplots.")
+                 #                     
+                 #                     h4("Look again at how to calculate the boxplot statistics when transforming") ,
+                 #                     
+                 #                     p(strong("The length of the whiskers is typically set at 1.5xIQR, that is, the 
+                 # whiskers extend to the most extreme data point which is no more than 1.5 times the interquartile 
+                 # range from the box. A value of zero, using the R function, causes the whiskers to extend to the data extremes. 
+                 #          So it may not be as simple as saying the whiskers extend 1.5xIQR.")),
+                 #                     
+                 #                     
+                 #                     div(""),
+                 #                     
+                 #                     p(strong("To summarise, apply the whisker calculation rule on the scale used to draw the boxplot. Therefore when using a transformation 
+                 # the calculations must 
+                 # be on the transformed scale. Do not mix scales. So, do not calculate the whiskers based on the 1.5xIQR rule
+                 # on the raw scale and then log transform 
+                 #          to present the boxplot.  
+                 #          The median and hinges will be the logs of the original median and hinges, they will match with odd sample sizes, but not generally with even. 
+                 #          The step which determines the length of the whiskers will change. Hence the fences generally will differ. 
+                 #          (The location of the end of the whiskers is referred to as the fences). ")) ,
+                 #                     
+                 #                     
+                 #                     p(strong("")),
+                 #                     h3("Take home messages; when the sample size is even, the hinges may not necessarily equal Q1 and Q3 (raw and transformed) and the transformed median may be slightly different to the raw median.
+                 #      The fences may not necessarily equal the fences on the raw scale for any sample size.
+                 #    Explicitly state how you constructed your boxplots.")
                             ) ,
                             
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                             tabPanel("Plot of the treatment effect estimates", 
+                                      div(plotOutput("reg.plote", width=fig.width, height=fig.height)),  
+                                      p(strong("Use Harrell's rms function 'contrast' to estimate the treatment effect at each visit:")),
+                                      div(class="span7", verbatimTextOutput("reg.summary4")),
+                                      
+                                      
+                             ) ,
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                            tabPanel("The data", value=3, 
-                                     div( verbatimTextOutput("table1")),
-                            ) ,
+                          
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                            tabPanel(" ", 
-                            ) ,
+                          
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                            tabPanel(" ", 
-                            )
+                            tabPanel("Diagnostics",
+                                     
+                                     div(plotOutput("res.plot", width=fig.width, height=fig.height)),       
+                                     
+                            ),
+                            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                             tabPanel("Data listing", value=3, 
+                                      div( verbatimTextOutput("table1")),
+                             ) 
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                         )
                         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -324,7 +351,7 @@ server <- shinyServer(function(input, output   ) {
             
         }
         
-        i=8
+        i=input$V
         
         z <- mdata(n=99,beta0=100, beta1=0, beta2=-5, ar.val=.9, sigma=5, tau0=7, tau1=1, tau01=0.01, m=i)
         df1 <- cbind(test=biochemistry[1], z)
@@ -425,18 +452,136 @@ server <- shinyServer(function(input, output   ) {
     make.data2 <- reactive({
         
         sample <- random.sample()
-        # rangez <-    sample$Whisker       # multiples of IQR length of whiskers, 0 means out to maximum
-        # n<-          sample$n  
-        # 
-        # y<- c(rbeta(n-4, 2,6)*35,  sample(50:150,4, replace=FALSE))
-        # x <- factor(sample(3, length(y), repl = TRUE))
-        # 
-        # d <- data.frame(x=x, y=y)
-        # d$logy <- log(d$y) # log the data
-        
-        return(list(d=d , y=d$y, rangez=rangez))# 
+       
         
     })
+    
+    
+    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+    fit.regression <- reactive({
+        
+       d <- make.data()$d1
+        
+       target <- input$Plot
+            
+       d <- d[d$test %in% target,]
+        
+       d$time <- d$memorypar
+           
+       require(rms)
+       
+       d$time <- factor(d$time) 
+       
+       d$time <- relevel(d$time, ref=input$VV)
+        
+       d$trt <- factor(d$tailindex) 
+       
+       d$yij <- d$hillest
+       
+       ddz <<- datadist(d)  # need the double in this environ <<
+        
+        options(datadist='ddz')
+        
+            
+            fit.res <-  
+                tryCatch(Gls(yij  ~ time * trt ,
+                             correlation=corSymm(form=~ as.numeric(time)|rep),
+                             weights=varIdent(form=~1|time),
+                             d, x=TRUE,
+                             na.action=na.exclude ), 
+                         error=function(e) e)
+ 
+            return(list(fit.res=fit.res  ))
+    })     
+    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # treatment effect estimate
+    fit.est <- reactive({
+        
+        # f <- fit.regression()
+        # 
+        # fit<- f$fit.res
+        # 
+        # 
+        # x <- contrast(fit , list(time= input$VV, trt="Active"), 
+        #                     list(time= input$VV, trt="Placebo"), type="average") 
+        # 
+        f <- fit.regression()
+        
+        fit <- f$fit.res
+        
+        time. <- rep(1:input$V)
+        
+        k1 <- contrast(fit, list(time=time.,  trt = 'Placebo'),
+                            list(time=time.,  trt = 'Active'))
+        
+        x <- as.data.frame(k1[c('time', 'Contrast', 'Lower', 'Upper')]) 
+        
+        return(list( est2=x ))
+        
+    })     
+    
+    #---------------------------------------------------------------------------
+    #---------------------------------------------------------------------------
+    #---------------------------------------------------------------------------
+    # Plot the esteimte trt effect  
+    
+    output$reg.plote <- renderPlot({         
+     
+        xl <- xlab( 'Visit')
+         
+        f <- fit.regression()
+        
+        fit <- f$fit.res
+        
+        time. <- rep(1:input$V)
+        
+        k1 <- contrast(fit, list(time=time.,  trt = 'Placebo'),
+                            list(time=time.,  trt = 'Active'))
+        
+        k1 <- as.data.frame(k1[c('time', 'Contrast', 'Lower', 'Upper')]) 
+        
+        mi <- floor(min(k1$Lower))
+        ma <- ceiling(max(k1$Upper))
+        
+        ggplot (k1, aes(x=time. , y=Contrast, group=1)) + geom_point () + geom_line () +
+            ylim(mi,ma) +
+            xlim(1, input$V) +
+            ylab( 'Placebo-Active')+ xl +
+            geom_errorbar(aes(ymin=Lower, ymax=Upper ), width =0) +
+            ggtitle("Treatment effect estimate at each visit with 95% CI") +
+                geom_hline(aes(yintercept = 0, colour = 'red'), linetype="dashed") +
+            theme_bw() +
+            theme(legend.position="none") +
+            theme(panel.background=element_blank(),
+                  # axis.text.y=element_blank(),
+                  # axis.ticks.y=element_blank(),
+                  # https://stackoverflow.com/questions/46482846/ggplot2-x-axis-extreme-right-tick-label-clipped-after-insetting-legend
+                  # stop axis being clipped
+                  plot.title=element_text(size = 18), plot.margin = unit(c(5.5,12,5.5,5.5), "pt"),
+                  legend.text=element_text(size=14),
+                  legend.title=element_text(size=14),
+                  legend.position="none",
+                  axis.text.x  = element_text(size=15),
+                  axis.text.y  = element_text(size=15),
+                  axis.line.x = element_line(color="black"),
+                  axis.line.y = element_line(color="black"),
+                  plot.caption=element_text(hjust = 0, size = 7),
+                  strip.text.x = element_text(size = 16, colour = "black", angle = 0),
+                  axis.title.y = element_text(size = rel(1.5), angle = 90),
+                  axis.title.x = element_text(size = rel(1.5), angle = 0),
+                  strip.background = element_rect(colour = "black", fill = "white"))
+           
+      
+        
+        
+    }) 
+    
+    
+    
+    
     # --------------------------------------------------------------------------
     # -----------------------------------------------OVERALL PLOT
     # ---------------------------------------------------------------------------
@@ -506,7 +651,7 @@ server <- shinyServer(function(input, output   ) {
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Individual profiles
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             
-               } else {
+               }  else  if (input$Plot1 == "Individual") { 
                     
                    
                    i <- as.numeric(unlist(strsplit(input$vec1,",")))
@@ -533,19 +678,18 @@ server <- shinyServer(function(input, output   ) {
                    pr1=NULL
                    pr1<-ggplot(d,aes(x=memorypar ,y=hillest,color=tailindex, fill=tailindex )) + 
                         stat_boxplot(geom = "errorbar", width = 0.3) +
-                       #stat_boxplot(geom='errorbar', linetype=1, width=0.5)+  #whiskers
                        geom_boxplot( outlier.colour = NA) +#,alpha=0.1, color="lightblue",)  +  
-                       #   stat_boxplot(geom='errorbar', linetype=1, width=0.5)+  #whiskers
-                      # geom_boxplot(data = d,
-                       #             aes(x = memorypar, y = hillest,  fill = tailindex ),outlier.shape = NA  , alpha=.2 ) + 
-                       scale_size_manual( values = c( 1) ) +
+                       
                        geom_line(data = dd,
                                  aes(group=rep,x = memorypar, y = hillest),  size = .6, linetype="dashed") +
+                           scale_size_manual( values = c( 1) ) +
                        
-                     
-                       # geom_point(aes(fill=tailindex, group=rep), pch=1, size=1, alpha=0.3, position = pd ) +
-                       # stat_summary(fun.y=mean, geom="point", shape=3, size=2, colour="black", stroke=1.5,
-                       #             position=pd, show.legend=FALSE) +
+                       geom_point(data=dd, aes(fill=tailindex, group=rep), 
+                                  pch=19, size=3, colur='black',alpha=0.7, position = pd ) +
+
+                       geom_point(aes(fill=tailindex, group=rep), 
+                                  pch=1, size=2, alpha=0.2, position = pd ) +
+                  
                        stat_summary(fun.y=mean, geom="point", shape=3, size=2, colour="black", stroke=1.5,
                                     position=pd, show.legend=FALSE) +
                        scale_color_manual(name = "Treatment", values = c("blue", "darkgreen") ) +
@@ -588,26 +732,67 @@ server <- shinyServer(function(input, output   ) {
                              ) 
                    )
                    
+                }   else  if (input$Plot1 ==  "Individual all tests") {
+                   
+                    i <- as.numeric(unlist(strsplit(input$vec1,",")))
+                  
+                    d <-d1
+                    
+                    dd <- d[d$rep %in% i[1],]
+                    
+                    sel <- unique(dd$tailindex)  
+                    
+                    d <- dd[dd$tailindex %in% sel,]
+ 
+                    require(lattice)
+
+                    lattice.options(panel.error=NULL)
+
+                    xyplot(hillest ~ memorypar | test,
+                           group = test, data = d,
+                           type = c( "p"),
+                           scales = "free")
+
                }
+               
+               
+               
  
         })
     
-    # Plot a scatter of the data  with selection of individual patients
     
-    output$reg.plot <- renderPlot({         
-  
-      
-        
-    })   
-    #---------------------------------------------------------------------------
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    output$res.plot  <- renderPlot({       
     
-    output$reg.plot2 <- renderPlot({         
-        
-       
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        
+    f <- fit.regression()
+    fit <- f$fit.res
+    
+    d <- make.data()$d1
+    target <- input$Plot
+    d <- d[d$test %in% target,]
+    d2 <- d
+    
+    d2$resid <- r <- resid(fit)
+    
+    d2$fitted <- fitted(fit)
+    
+    yl <- ylab('Residuals') 
+    
+    xl <- xlab("time")
+    
+    p1 <- ggplot(d2 , aes(x=fitted , y=resid)) + geom_point () + yl 
+    
+    p3 <- ggplot(d2 , aes(x=memorypar , y=resid)) +  geom_point () + yl  + xl +
+        stat_summary(fun.data ="mean_sdl", geom='smooth') 
+    
+    p4 <- ggplot(d2 , aes(sample=resid)) + stat_qq() +
+        geom_abline(intercept=mean(r), slope=sd(r)) + yl 
+    
+    gridExtra::grid.arrange(p1,  p3, p4, ncol=2) #
+    
     })
-    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
     # listing of simulated data
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
@@ -615,46 +800,42 @@ server <- shinyServer(function(input, output   ) {
         
         foo<- make.data()$d1
         
+        target <- input$Plot
+        
+        foo <- foo[foo$test %in% target,]
+        
         foo$eij <- NULL 
         
-        names(foo) <- c("heamatology test", "id", "visit", "trt","response")
+        names(foo) <- c("haematology test", "id", "visit", "trt","response")
+        
+        rownames(foo) <- NULL
         
         return(foo)
         
     })
     
+  
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+    # estimate at specified time
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+    output$reg.summary4 <- renderPrint({
+        
+        summary4 <- fit.est()$est2
+        
+        return(list(summary4))
+        
+    })     
     
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    output$table2 <- renderPrint({
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+    # model output
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+    output$reg.summary2 <- renderPrint({
         
-        # dd <-  make.data2()$d 
-        # 
-        # rangez <-    input$Whisker 
-        # 
-        # bs <- boxplot.stats(dd$y, coef = rangez, do.conf = FALSE, do.out = FALSE)$stats
-        # bs <- as.numeric((as.vector(bs))) #p2
-        # names(bs ) <- c("Lower whisker", "Lower ‘hinge’", "Median", "Upper ‘hinge’" ,"Upper whisker")
-        # 
-        # return(  print(bs, row.names = FALSE)) 
+        summary <- fit.regression()$fit.res
         
-    })
-    
-    output$table3 <- renderPrint({
+        return(list(summary))
         
-        # dd <-  make.data2()$d 
-        # 
-        # f <- summary(dd$y)[c(2,3,5)]
-        # f <- as.matrix(f);
-        # #f <-p2(f)   # here
-        # f <- as.numeric(f)
-        # # f<-(p2(f))
-        # f<-as.data.frame(t(f))
-        # #    names(f ) <- c("Minimum", "1st.Quartile", "Median", "Mean", "3rd.Quartile", "Maximum")
-        # names(f ) <- c( "1st.Quartile", "Median",  "3rd.Quartile")
-        # 
-        # return( print(f, row.names = FALSE)) 
-        
-    })
+    })  
     
     
     output$table4 <- renderPrint({
