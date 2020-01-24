@@ -22,7 +22,7 @@ library(shinythemes)        # more funky looking apps
 p1 <- function(x) {formatC(x, format="f", digits=1)}
 p2 <- function(x) {formatC(x, format="f", digits=2)}
 options(width=100)
-set.seed(12345) #reproducible
+#set.seed(12345) #reproducible
  
 
 # function to create longitudinal data
@@ -84,7 +84,7 @@ ui <- fluidPage(theme = shinytheme("journal"),
                     
                     #ui <-shinyUI(pageWithSidebar(
                     
-                    headerPanel("Presenting results of diagnostic test results routinely ordered to determine a person's general 
+                    headerPanel("Presenting the results of diagnostic tests routinely ordered to determine general 
                     health status"),
                     
                     #sidebarLayout(  #new
@@ -93,11 +93,11 @@ ui <- fluidPage(theme = shinytheme("journal"),
                     sidebarPanel( 
                         
                     div(p("Typically for clinical trials and non-interventional studies reams of
-                    output tables are generated presenting biochemistry and haemotology test result summary statistics overtime.
-                    We will focus on biochemistry tests that are routinely ordered to determine a person's general 
+                    output tables are generated presenting biochemistry and haemotology test results, perhaps summarised over time.
+                    We will focus on biochemistry tests that are routinely ordered to determine a patient's general 
                     health status.
-                          How useful presenting a multitude of output tables of the test result summary statistics 
-                          is is open to debate. Firstly the presentation is very dry. 
+                          How useful it is presenting a multitude of output tables of test result summary statistics 
+                          is open to debate. Firstly, the presentation is extremely dry. 
                           There is the issue too, that it is
                           quite possible a different data set can give rise to similar summary statistics [1]. 
                           Spotting errors in the data is also not easy and
@@ -236,7 +236,13 @@ ui <- fluidPage(theme = shinytheme("journal"),
                                      
                             ) ,
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                            tabPanel("Modelling", value=3, 
+                            tabPanel("Summary statistics", value=3, 
+                                     #  div( verbatimTextOutput("table2")),
+                                     h2("Summary statistics, typically generated as outputs for clinicial scrutiny"),
+                                     DT::dataTableOutput("table2")
+                            ) ,
+                            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                            tabPanel("Statistical modelling", value=3, 
                                      h2("Modelling"),
                                      # div(plotOutput("reg.plot2", width=fig.width, height=fig.height)),  
                                      # h3("Figure 2 Top panel untransformed data, bottom panel using a natural log transformation"),
@@ -306,12 +312,7 @@ ui <- fluidPage(theme = shinytheme("journal"),
                                      div(plotOutput("res.plot", width=fig.width, height=fig.height)),       
                                      
                             ),
-                 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                           tabPanel("Summary statistics", value=3, 
-                                  #  div( verbatimTextOutput("table2")),
-                                    h2("Summary statistics, typically generated as outputs for clinicial scrutiny"),
-                                    DT::dataTableOutput("table2")
-                           ) ,
+              
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                              tabPanel("Data listing", value=3, 
                                       h2("Data listing"),
@@ -900,8 +901,21 @@ server <- shinyServer(function(input, output   ) {
         library(DT)
 
         ff <-   f %>%
-        datatable() %>%
-        formatRound(columns=c("Minimum", "Mean" , "SD", "SE", "Q1","Median","Q3", "Maximum"), digits=2)
+        datatable(  ) %>%
+        formatRound(
+          columns=c("Minimum", "Mean" , "SD", "SE", "Q1","Median","Q3", "Maximum"), digits=2)  
+        
+       
+        #              
+                    
+        # datatable(f,  options = list(
+        #   columnDefs = list(list(className = 'dt-center', targets = 5)),
+        #   
+        #   pageLength = 5,
+        #   lengthMenu = c(2, 10, 15, 20)
+        # ), )
+        
+                    
       
     #  return(ff)
       
