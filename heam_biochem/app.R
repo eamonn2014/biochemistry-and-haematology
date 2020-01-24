@@ -91,9 +91,11 @@ ui <- fluidPage(theme = shinytheme("journal"),
                     sidebarPanel( 
                         
                     div(p("Typically for clinical trials and non-interventional studies reams of
-                    outputs of tables are generated presenting biochemistry and haemotology summary statistics,
-                    perhaps overtime.
-                          How useful this format is is open to debate, the presentation is very dry. 
+                    output tables are generated presenting biochemistry and haemotology test result summary statistics overtime.
+                    We will focus on biochemistry tests that are routinely ordered to determine a person's general 
+                    health status.
+                          How useful presenting a multitude of output tables of the test result summary statistics 
+                          is is open to debate. Firstly the presentation is very dry. 
                           There is the issue too, that it is
                           quite possible a different data set can give rise to similar summary statistics [1]. 
                           Spotting errors in the data is also not easy and
@@ -128,14 +130,15 @@ ui <- fluidPage(theme = shinytheme("journal"),
                             br(),
                             
                             selectInput("Plot1",
-                                        strong("Select plot preference "),
+                                        strong("1. Choice of plot"),
                                         choices=c("Overall","Individual","Individual all tests")),
                             
                             selectInput("Plot",
-                                        strong("Select plot preference "),
+                                        strong("2. Select which biochemistry test to present for all patients"),
                                         choices=biochemistry),
                             
-                            textInput('vec1', "Select plot preference 'Individual' and enter sample ID(s) (comma delimited), enter 999 to show all profiles", "1,2,3,4"),
+                            textInput('vec1', "3. If 'Choice of plot' 'Individual' is selected, enter sample ID(s) (comma delimited); 
+                                      enter 999 to show all profiles; If 'Individual all tests' is selected, all test results for the first ID only are presented", "1,2,3,4"),
                             
                             
                             sliderInput("V",
@@ -143,38 +146,39 @@ ui <- fluidPage(theme = shinytheme("journal"),
                                         min=3, max=10, step=1, value=8, ticks=FALSE),
                             
                             sliderInput("VV",
-                                        "Estimate trt effect at this visit",
+                                        "Estimate treatment effect at this visit",
                                         min=1, max=10, step=1, value=4, ticks=FALSE),
                             
                             
-                            sliderInput("N",
-                                        "Select the total number of data points",
-                                        min=3, max=500, step=1, value=100, ticks=FALSE),
-                            
-                            sliderInput("Whisker",
-                                        "Select the length of whiskers (multiples of the IQR)",
-                                        min=0, max=3, step=.5, value=1.5, ticks=TRUE),
-                            
-                            sliderInput("outliers",
-                                        "Highlight 'outliers'",
-                                        min=0, max=1, step=1, value=0, ticks=FALSE),
-                            
-                            sliderInput("dp",
-                                        "Show me the data!",
-                                        min=0, max=1, step=1, value=1, ticks=FALSE),
+                            # sliderInput("N",
+                            #             "Select the total number of data points",
+                            #             min=3, max=500, step=1, value=100, ticks=FALSE),
+                            # 
+                            # sliderInput("Whisker",
+                            #             "Select the length of whiskers (multiples of the IQR)",
+                            #             min=0, max=3, step=.5, value=1.5, ticks=TRUE),
+                            # 
+                            # sliderInput("outliers",
+                            #             "Highlight 'outliers'",
+                            #             min=0, max=1, step=1, value=0, ticks=FALSE),
+                            # 
+                            # sliderInput("dp",
+                            #             "Show me the data!",
+                            #             min=0, max=1, step=1, value=1, ticks=FALSE),
                             
                             div(p("References:")),  
                             
-                            tags$a(href = "https://en.wikipedia.org/wiki/Exploratory_data_analysis", "[1] Tukey, J.W. 'Exploratory Data Analysis'"),
+                            # tags$a(href = "https://en.wikipedia.org/wiki/Exploratory_data_analysis", "[1] Tukey, J.W. 'Exploratory Data Analysis'"),
+                            # div(p(" ")),
+                            # tags$a(href = "https://www.rdocumentation.org/packages/graphics/versions/3.6.2/topics/boxplot", "[2] R boxplot"),
+                            # div(p(" ")),
+                            tags$a(href = "https://ggplot2.tidyverse.org/reference/geom_boxplot.html", "[1] Boxplots using ggplot2"),
                             div(p(" ")),
-                            tags$a(href = "https://www.rdocumentation.org/packages/graphics/versions/3.6.2/topics/boxplot", "[2] R boxplot"),
+                            tags$a(href = "https://en.wikipedia.org/wiki/Anscombe%27s_quartet", "[2] Anscombe's quartet"),
                             div(p(" ")),
-                            tags$a(href = "https://en.wikipedia.org/wiki/Anscombe%27s_quartet", "[3] Anscombe's quartet"),
-                            div(p(" ")),
-                            tags$a(href = "https://ggplot2.tidyverse.org/reference/geom_boxplot.html", "[4] Boxplots using ggplot2"),
-                            div(p(" ")),
-                            tags$a(href = "https://r.789695.n4.nabble.com/Whiskers-on-the-default-boxplot-graphics-td2195503.html", "[5] Whiskers on the default boxplot"),
-                            div(p(" ")),
+                         
+                            # tags$a(href = "https://r.789695.n4.nabble.com/Whiskers-on-the-default-boxplot-graphics-td2195503.html", "[5] Whiskers on the default boxplot"),
+                            # div(p(" ")),
                             
                         )
                         
@@ -243,8 +247,10 @@ ui <- fluidPage(theme = shinytheme("journal"),
                                      
                                      # p(strong("Use Harrell's rms function 'contrast' to estimate the treatment effect at desired visit by selecting 'What timepoint to estimate trt B- trt A?:'")),
                                      # div(class="span7", verbatimTextOutput("reg.summary4")),
-                                     p(strong("GLS model fit, visit is using the selected reference level, so simply we can read off the treatment effect directly from the model output for the visit estimate.")),
-                                     div(class="span7", verbatimTextOutput("reg.summary2")),
+                                     p(strong("Be patient...A GLS model fit with unstructured covariance structure will appear, the visit variable is using the selected reference level, we can simply
+                                               read off the treatment effect directly from the model output for the treatment effect at that visit.")),
+                                     div(class="span7", verbatimTextOutput("table4")),
+                                      div(class="span7", verbatimTextOutput("reg.summary2")),
                                      
                  #                     
                  #                     h4("Look again at how to calculate the boxplot statistics when transforming") ,
@@ -353,10 +359,17 @@ server <- shinyServer(function(input, output   ) {
         
         i=input$V
         
+       # beta1 = slope
+      #  beta2 = tr effect
+        
+        
+        # trt <- c(-5,.4,-5,0,2,2,.1,.1,.1,.1,.1,.05,5,.5,.5,.1,1)
+        
+        
         z <- mdata(n=99,beta0=100, beta1=0, beta2=-5, ar.val=.9, sigma=5, tau0=7, tau1=1, tau01=0.01, m=i)
         df1 <- cbind(test=biochemistry[1], z)
 
-        z <- mdata(n=85,beta0=5.6, beta1=0, beta2=-.4, ar.val=.9, sigma=.02, tau0=.2, tau1=.02, tau01=0.01, m=i)
+        z <- mdata(n=85,beta0=5.6, beta1=0, beta2=-.04, ar.val=.9, sigma=.4, tau0=.2, tau1=.04, tau01=0.1, m=i)
         df2 <- cbind(test=biochemistry[2], z)
 
         z <- mdata(n=102,beta0=110, beta1=0, beta2=-5, ar.val=.9, sigma=5, tau0=.5, tau1=.5, tau01=0.01, m=i)
@@ -493,7 +506,7 @@ server <- shinyServer(function(input, output   ) {
                              na.action=na.exclude ), 
                          error=function(e) e)
  
-            return(list(fit.res=fit.res  ))
+            return(list(fit.res=fit.res , target = target ))
     })     
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -526,7 +539,7 @@ server <- shinyServer(function(input, output   ) {
     #---------------------------------------------------------------------------
     #---------------------------------------------------------------------------
     #---------------------------------------------------------------------------
-    # Plot the esteimte trt effect  
+    # Plot the estimated trt effect  
     
     output$reg.plote <- renderPlot({         
      
@@ -549,9 +562,9 @@ server <- shinyServer(function(input, output   ) {
         ggplot (k1, aes(x=time. , y=Contrast, group=1)) + geom_point () + geom_line () +
             ylim(mi,ma) +
             xlim(1, input$V) +
-            ylab( 'Placebo-Active')+ xl +
+            ylab( 'Placebo - Active')+ xl +
             geom_errorbar(aes(ymin=Lower, ymax=Upper ), width =0) +
-            ggtitle("Treatment effect estimate at each visit with 95% CI") +
+            ggtitle(paste0("Outcome measure ", input$Plot ,"; treatment effect estimate at each visit with 95% CI")) +
                 geom_hline(aes(yintercept = 0, colour = 'red'), linetype="dashed") +
             theme_bw() +
             theme(legend.position="none") +
@@ -734,29 +747,28 @@ server <- shinyServer(function(input, output   ) {
                    
                 }   else  if (input$Plot1 ==  "Individual all tests") {
                    
-                    i <- as.numeric(unlist(strsplit(input$vec1,",")))
-                  
-                    d <-d1
-                    
-                    dd <- d[d$rep %in% i[1],]
-                    
-                    sel <- unique(dd$tailindex)  
-                    
-                    d <- dd[dd$tailindex %in% sel,]
- 
-                    require(lattice)
-
-                    lattice.options(panel.error=NULL)
-                    
-                    colnames(d)[colnames(d)=="hillest"] <- "value"
-                     
-                    colnames(d)[colnames(d)=="memorypar"] <- "Visit"
-                     
-
-                    xyplot(value ~ Visit | test,
-                           par.strip.text=list(cex=.7),
-                           group = test, data = d,
-                             type = c("p" ),  scales = "free") 
+                                  i <- as.numeric(unlist(strsplit(input$vec1,",")))
+                                
+                                  d <-d1
+                                  
+                                  dd <- d[d$rep %in% i[1],]
+                                  
+                                  sel <- unique(dd$tailindex)  
+                                  
+                                  d <- dd[dd$tailindex %in% sel,]
+               
+                                  require(lattice)
+              
+                                  lattice.options(panel.error=NULL)
+                                  
+                                  colnames(d)[colnames(d)=="hillest"] <- "value"
+                                   
+                                  colnames(d)[colnames(d)=="memorypar"] <- "Visit"
+                                   
+                                  xyplot(value ~ Visit | test,
+                                         par.strip.text=list(cex=.7),
+                                         group = test, data = d,
+                                           type = c("p" ),  scales = "free") 
 
                }
                
@@ -767,33 +779,35 @@ server <- shinyServer(function(input, output   ) {
     
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # diagnostics
+    
     output$res.plot  <- renderPlot({       
     
-    f <- fit.regression()
-    fit <- f$fit.res
-    
-    d <- make.data()$d1
-    target <- input$Plot
-    d <- d[d$test %in% target,]
-    d2 <- d
-    
-    d2$resid <- r <- resid(fit)
-    
-    d2$fitted <- fitted(fit)
-    
-    yl <- ylab('Residuals') 
-    
-    xl <- xlab("time")
-    
-    p1 <- ggplot(d2 , aes(x=fitted , y=resid)) + geom_point () + yl 
-    
-    p3 <- ggplot(d2 , aes(x=memorypar , y=resid)) +  geom_point () + yl  + xl +
-        stat_summary(fun.data ="mean_sdl", geom='smooth') 
-    
-    p4 <- ggplot(d2 , aes(sample=resid)) + stat_qq() +
-        geom_abline(intercept=mean(r), slope=sd(r)) + yl 
-    
-    gridExtra::grid.arrange(p1,  p3, p4, ncol=2) #
+          f <- fit.regression()
+          fit <- f$fit.res
+          
+          d <- make.data()$d1
+          target <- input$Plot
+          d <- d[d$test %in% target,]
+          d2 <- d
+          
+          d2$resid <- r <- resid(fit)
+          
+          d2$fitted <- fitted(fit)
+          
+          yl <- ylab('Residuals') 
+          
+          xl <- xlab("time")
+          
+          p1 <- ggplot(d2 , aes(x=fitted , y=resid)) + geom_point () + yl 
+          
+          p3 <- ggplot(d2 , aes(x=memorypar , y=resid)) +  geom_point () + yl  + xl +
+              stat_summary(fun.data ="mean_sdl", geom='smooth') 
+          
+          p4 <- ggplot(d2 , aes(sample=resid)) + stat_qq() +
+              geom_abline(intercept=mean(r), slope=sd(r)) + yl 
+          
+          gridExtra::grid.arrange(p1,  p3, p4, ncol=2) #
     
     })
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -811,7 +825,7 @@ server <- shinyServer(function(input, output   ) {
         
         foo$eij <- NULL 
         
-        names(foo) <- c("haematology test", "id", "visit", "trt","response")
+        names(foo) <- c("biochemistry test", "id", "visit", "trt","response")
         
         rownames(foo) <- NULL
         
@@ -844,6 +858,10 @@ server <- shinyServer(function(input, output   ) {
     
     
     output$table4 <- renderPrint({
+      
+      f <- fit.regression()$target
+      
+      
         
         # dd <-  make.data2()$d 
         # 
