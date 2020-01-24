@@ -23,6 +23,7 @@ p1 <- function(x) {formatC(x, format="f", digits=1)}
 p2 <- function(x) {formatC(x, format="f", digits=2)}
 options(width=100)
 set.seed(12345) #reproducible
+ 
 
 # function to create longitudinal data
 
@@ -83,7 +84,8 @@ ui <- fluidPage(theme = shinytheme("journal"),
                     
                     #ui <-shinyUI(pageWithSidebar(
                     
-                    headerPanel("Presenting biochemistry and haematology data in RCTs"),
+                    headerPanel("Presenting results of diagnostic test results routinely ordered to determine a person's general 
+                    health status"),
                     
                     #sidebarLayout(  #new
                     # Sidebar with a slider and selection inputs
@@ -124,35 +126,35 @@ ui <- fluidPage(theme = shinytheme("journal"),
                             The selection of individual plot allows
                             the inspection of patient profiles of choice to be displayed.
                             Both the number of data points and the length of the whiskers can be varied. 
-                 The ggplot2 default whisker length uses the common 1.5xIQR rule.Hhere the patient IDs are 
+                 The ggplot2 default whisker length uses the common 1.5xIQR rule. Here the patient IDs are 
                  just numeric starting at 1. Selecting patient ID 999 will 
                  show all patients.")),
                             br(),
-                            
-                            selectInput("Plot1",
-                                        strong("1. Choice of plot"),
-                                        choices=c("Overall","Individual","Individual all tests")),
-                            
                             selectInput("Plot",
-                                        strong("2. Select which biochemistry test to present for all patients"),
+                                        strong("1. Select which biochemistry test to present for all patients"),
                                         choices=biochemistry),
                             
-                            textInput('vec1', "3. If 'Choice of plot' 'Individual' is selected, enter sample ID(s) (comma delimited); 
+                            selectInput("Plot1",
+                                        strong("2. Select plot"),
+                                        choices=c("Overall","Individual","Individual all tests")),
+                            
+                     
+                            textInput('vec1', "3. Select patient. If '2 select plot' 'Individual' is selected, enter sample ID(s) (comma delimited); 
                                       enter 999 to show all profiles; If 'Individual all tests' is selected, all test results for the first ID only are presented", "1,2,3,4"),
                             
                             
                             sliderInput("V",
-                                        "Maximum visit number",
-                                        min=3, max=10, step=1, value=8, ticks=FALSE),
+                                        "4. Maximum visit number in data simulation",
+                                        min=5, max=10, step=1, value=8, ticks=FALSE),
                             
                             sliderInput("VV",
-                                        "Estimate treatment effect at this visit",
-                                        min=1, max=10, step=1, value=4, ticks=FALSE),
+                                        "5. Estimate treatment effect at this visit",
+                                        min=5, max=10, step=1, value=4, ticks=FALSE),
                             
                             
-                            # sliderInput("N",
-                            #             "Select the total number of data points",
-                            #             min=3, max=500, step=1, value=100, ticks=FALSE),
+                            sliderInput("N",
+                                        "Select the total number of data points",
+                                        min=3, max=500, step=1, value=100, ticks=FALSE),
                             # 
                             # sliderInput("Whisker",
                             #             "Select the length of whiskers (multiples of the IQR)",
@@ -205,13 +207,17 @@ ui <- fluidPage(theme = shinytheme("journal"),
                    ")), 
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~end of section to add colour     
                             tabPanel("Plotting the data", 
-                                     
+                                 #    h2("Plotting the data"),
                                      div(plotOutput("reg.plot3", width=fig.width, height=fig.height)),  
                                      
                                      
                                      h3("Figure 1 Left panel untransformed data, right panel natural log transformation labelled with antilogs"),
                                      
-                                     p(strong("Boxplots are simple graphical characterisations of continuous variables. 
+                                     p(strong(
+                                      " The first option  '1. Select which biochemistry test to present for all patients' 
+                                      allows the selction of one particular test. The next option 2. Select plot
+                                     
+                                     Boxplots are simple graphical characterisations of continuous variables. 
         Boxplots were proposed by Tukey, J.W. in his 1977 book 'Exploratory Data Analysis' (only in 1977!).
                   In this example, we re-express the data using a natural logarithmic transformation.
                   Next, prior to presentation, perform the boxplot calculations. So first, perform the natural
@@ -231,6 +237,7 @@ ui <- fluidPage(theme = shinytheme("journal"),
                             ) ,
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             tabPanel("Modelling", value=3, 
+                                     h2("Modelling"),
                                      # div(plotOutput("reg.plot2", width=fig.width, height=fig.height)),  
                                      # h3("Figure 2 Top panel untransformed data, bottom panel using a natural log transformation"),
                                      # 
@@ -247,8 +254,9 @@ ui <- fluidPage(theme = shinytheme("journal"),
                                      
                                      # p(strong("Use Harrell's rms function 'contrast' to estimate the treatment effect at desired visit by selecting 'What timepoint to estimate trt B- trt A?:'")),
                                      # div(class="span7", verbatimTextOutput("reg.summary4")),
-                                     p(strong("Be patient...A GLS model fit with unstructured covariance structure will appear, the visit variable is using the selected reference level, we can simply
-                                               read off the treatment effect directly from the model output for the treatment effect at that visit.")),
+                                     p(strong("Be patient...A generalised least squares model fit with unstructured covariance structure will appear, 
+                                     the reference level for the visit variable is selected using the slider '5. Estimate treatment effect at this visit'.
+                                     This means we can simply read off the treatment effect ' trt=Placebo ' directly from the model output, for the treatment effect estimate comparing Placebo - Active at that particular visit.")),
                                      div(class="span7", verbatimTextOutput("table4")),
                                       div(class="span7", verbatimTextOutput("reg.summary2")),
                                      
@@ -281,6 +289,7 @@ ui <- fluidPage(theme = shinytheme("journal"),
                             
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                              tabPanel("Plot of the treatment effect estimates", 
+                                      h2("Plot of the treatment effect estimates"),
                                       div(plotOutput("reg.plote", width=fig.width, height=fig.height)),  
                                       p(strong("Use Harrell's rms function 'contrast' to estimate the treatment effect at each visit:")),
                                       div(class="span7", verbatimTextOutput("reg.summary4")),
@@ -293,12 +302,19 @@ ui <- fluidPage(theme = shinytheme("journal"),
                           
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             tabPanel("Diagnostics",
-                                     
+                                     h2("Model diagnostics"),
                                      div(plotOutput("res.plot", width=fig.width, height=fig.height)),       
                                      
                             ),
+                 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                           tabPanel("Summary statistics", value=3, 
+                                  #  div( verbatimTextOutput("table2")),
+                                    h2("Summary statistics, typically generated as outputs for clinicial scrutiny"),
+                                    DT::dataTableOutput("table2")
+                           ) ,
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                              tabPanel("Data listing", value=3, 
+                                      h2("Data listing"),
                                       div( verbatimTextOutput("table1")),
                              ) 
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -513,14 +529,8 @@ server <- shinyServer(function(input, output   ) {
     # treatment effect estimate
     fit.est <- reactive({
         
-        # f <- fit.regression()
-        # 
-        # fit<- f$fit.res
-        # 
-        # 
-        # x <- contrast(fit , list(time= input$VV, trt="Active"), 
-        #                     list(time= input$VV, trt="Placebo"), type="average") 
-        # 
+   
+ 
         f <- fit.regression()
         
         fit <- f$fit.res
@@ -529,6 +539,10 @@ server <- shinyServer(function(input, output   ) {
         
         k1 <- contrast(fit, list(time=time.,  trt = 'Placebo'),
                             list(time=time.,  trt = 'Active'))
+        
+        # k1 <- contrast(fit , list(time= input$VV, trt="Active"), 
+        #                    list(time= input$VV, trt="Placebo"), type="average") 
+        
         
         x <- as.data.frame(k1[c('time', 'Contrast', 'Lower', 'Upper')]) 
         
@@ -610,6 +624,13 @@ server <- shinyServer(function(input, output   ) {
             
             d <- d[d$test %in% target,]
             
+            # lets get counts to put in ribbons
+            d$tailindex <- factor(d$tailindex)
+            dx <- unique(d[,c("rep","tailindex")])
+            table(dx$tailindex)
+            n <- as.vector(table(dx$tailindex))
+            levels(d$tailindex) <- c(paste0("Active N=",n[1]), paste0("Placebo N=",n[2])) 
+            
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             pd <- position_dodge(.4)
             pr1=NULL
@@ -634,8 +655,9 @@ server <- shinyServer(function(input, output   ) {
             
             #####################
             print(pr1 + labs(y=target, x = "Visit") + 
-                      ggtitle(paste0("N=",length(unique(d$rep)),
-                                     " is the total number of patients; profiles with the number of patient values at visit") ) +
+                      ggtitle(paste0("There are N=",
+                                     length(unique(d$rep)),  
+    " patients with data at baseline, presenting all patient profiles, with boxplots and the number of patient values at each visit") ) +
                       theme_bw() +
                       theme(legend.position="none") +
                       theme(panel.background=element_blank(),
@@ -673,6 +695,11 @@ server <- shinyServer(function(input, output   ) {
                    
                    d <- d[d$test %in% target,]
                    
+                   d$tailindex <- factor(d$tailindex)
+                   dx <- unique(d[,c("rep","tailindex")])
+                   table(dx$tailindex)
+                   n <- as.vector(table(dx$tailindex))
+                   levels(d$tailindex) <- c(paste0("Active N=",n[1]), paste0("Placebo N=",n[2])) 
                    #  if 999 is entered all subjects are shown
                    
                    if("999" %in% i) {
@@ -684,9 +711,20 @@ server <- shinyServer(function(input, output   ) {
                        dd <- d[d$rep %in% i,]
                    }
                    
+                   
                    sel <- unique(dd$tailindex) #if only one arm , dont show the empty arm
                    d <- d[d$tailindex %in% sel,]
                    
+                    dx <- unique(dd[,c("rep","tailindex")])
+                   
+                     nn <- as.vector(table(dx$tailindex))
+                     
+                     levels(d$tailindex)  <- levels(dd$tailindex) <- 
+                       c(paste0("Active N=",n[1], " with " ,nn[1]," patient profile(s) shown"), 
+                        paste0("Placebo N=",n[2], " with " ,nn[2]," patient profile(s) shown"))
+                   
+                      
+                     
                    pd <- position_dodge(.4)
                    pr1=NULL
                    pr1<-ggplot(d,aes(x=memorypar ,y=hillest,color=tailindex, fill=tailindex )) + 
@@ -698,13 +736,15 @@ server <- shinyServer(function(input, output   ) {
                            scale_size_manual( values = c( 1) ) +
                        
                        geom_point(data=dd, aes(fill=tailindex, group=rep), 
-                                  pch=19, size=3, colur='black',alpha=0.7, position = pd ) +
+                                  pch=19, size=3, colour='black',alpha=0.7, position = pd ) +
 
                        geom_point(aes(fill=tailindex, group=rep), 
                                   pch=1, size=2, alpha=0.2, position = pd ) +
                   
                        stat_summary(fun.y=mean, geom="point", shape=3, size=2, colour="black", stroke=1.5,
                                     position=pd, show.legend=FALSE) +
+                     
+                     
                        scale_color_manual(name = "Treatment", values = c("blue", "darkgreen") ) +
                        scale_fill_manual(name = "Treatment", values = c("lightblue", "green") ) +
                        
@@ -720,9 +760,15 @@ server <- shinyServer(function(input, output   ) {
                    
                    #####################
                    print(pr1 + labs(y=target, x = "Visit") + 
-                             ggtitle(paste0("N=",length(unique(d$rep)),
-                                            " is the total number of patients; profiles with the number of patient values at visit") ) +
-                             theme_bw() +
+                            # ggtitle(paste0("N=",length(unique(d$rep)),
+                             #               " is the total number of patients; profiles with the number of patient values at visit") ) +
+                          # ggtitle(paste0("There are N=",length(unique(d$rep)),  " patients with data at baseline, boxplots at each visit with all patient profiles and the number of patient values at each visit") ) +
+                           
+                           
+                           ggtitle(paste0("There are N=",
+                                          length(unique(d$rep)),  
+                                          " patients with data at baseline, presenting selected patient profiles") ) +
+                           theme_bw() +
                              theme(legend.position="none") +
                              theme(panel.background=element_blank(),
                                    # axis.text.y=element_blank(),
@@ -747,6 +793,7 @@ server <- shinyServer(function(input, output   ) {
                    
                 }   else  if (input$Plot1 ==  "Individual all tests") {
                    
+                   
                                   i <- as.numeric(unlist(strsplit(input$vec1,",")))
                                 
                                   d <-d1
@@ -768,7 +815,7 @@ server <- shinyServer(function(input, output   ) {
                                   xyplot(value ~ Visit | test,
                                          par.strip.text=list(cex=.7),
                                          group = test, data = d,
-                                           type = c("p" ),  scales = "free") 
+                                           type = c("p" ,"l"),  scales = "free") 
 
                }
                
@@ -825,7 +872,7 @@ server <- shinyServer(function(input, output   ) {
         
         foo$eij <- NULL 
         
-        names(foo) <- c("biochemistry test", "id", "visit", "trt","response")
+        names(foo) <- c("Biochemistry test", "ID", "Visit", "Treatment","Response")
         
         rownames(foo) <- NULL
         
@@ -833,7 +880,34 @@ server <- shinyServer(function(input, output   ) {
         
     })
     
-  
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+    # summary stats
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+   # output$table2 <- renderPrint({
+      output$table2 = DT::renderDataTable({
+      
+      foo<- make.data()$d1
+      
+      f<-plyr::ddply(foo, c("test", "memorypar","tailindex"), summarise,
+                  min=min(hillest),mean = mean(hillest), sd = sd(hillest, na.rm=TRUE),
+                  sem = sd(hillest)/sqrt(length(hillest)),  Q1=quantile(hillest, 0.25)    , 
+                  median=median(hillest),   Q3=quantile(hillest, 0.75)  , max=max(hillest)  )
+      
+        names(f) <- c("Biochemistry test",  "Visit", "Treatment","Minimum", "Mean" , "SD", "SE", "Q1","Median","Q3", "Maximum")
+      
+        rownames(f) <- NULL
+     
+        library(DT)
+
+        ff <-   f %>%
+        datatable() %>%
+        formatRound(columns=c("Minimum", "Mean" , "SD", "SE", "Q1","Median","Q3", "Maximum"), digits=2)
+      
+    #  return(ff)
+      
+    })
+    
+    
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
     # estimate at specified time
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
