@@ -91,7 +91,7 @@ ui <- fluidPage(theme = shinytheme("paper"), #https://www.rdocumentation.org/pac
                         div(
                             
                             actionButton(inputId='ab1', label="R code",   icon = icon("th"), 
-                                         onclick ="window.open('https://raw.githubusercontent.com/eamonn2014/Boxplots/master/app.R', '_blank')"),   
+                                         onclick ="window.open('https://raw.githubusercontent.com/eamonn2014/biochemistry-and-haematology/master/heam_biochem/app.R', '_blank')"),   
                             actionButton("resample", "Simulate a new sample"),
                             br(), br(),
                             
@@ -230,9 +230,9 @@ to compare the parallel groups, not to look at change from baseline.
                                      h4("Four residual plots to check for absence of trends in central tendency and in variability"),
                                      div(plotOutput("res.plot", width=fig.width, height=fig.height)),       
                                      p(strong("Upper left panel shows the baseline score on the x-axis. 
-                                              Upper right panel shows shows time on the x-axis. 
+                                              Upper right panel shows shows time on the x-axis, note though the selected reference level is plotted first.
                                               Bottom left panel is the QQ plot for checking normality of residuals from the GLS fit.
-                                              Bottom right panel is the histogram for checking normality of residuals from the GLS fit.
+                                              Bottom right panel is the histogram for checking normality of residuals from the GLS fit with ~N(mean=0, sd=GLS model sigma) curve superimposed.
                                               ")),
                             ),
               
@@ -808,16 +808,22 @@ server <- shinyServer(function(input, output   ) {
             xlab('Residuals')   +
             ggtitle( " ")  
            
+          # p5 <- d2 %>%
+          #   ggplot( aes(x=r)) +
+          #   geom_histogram( fill="#69b3a2", color="#e9ecef", alpha=0.9) + #binwidth=1, 
+          #  theme(
+          #     plot.title = element_text(size=15)
+          #   ) 
+        
+         df <- data.frame(PF = r)
+          p5 <- ggplot(df, aes(x = PF)) + 
+            geom_histogram(aes(y =..density..),
+                           #breaks = seq(-50, 50, by = 2), 
+                           colour = "black", 
+                           fill = "#69b3a2") +
+            stat_function(fun = dnorm, args = list(mean = 0, sd = sigma(fit)  ))
           
-          p5 <- d2 %>%
-         
-            ggplot( aes(x=r)) +
-            geom_histogram( fill="#69b3a2", color="#e9ecef", alpha=0.9) + #binwidth=1, 
-         
-           theme(
-              plot.title = element_text(size=15)
-            ) 
-       gridExtra::grid.arrange(p1,  p3, p4,p5, ncol=2) #
+          gridExtra::grid.arrange(p1,  p3, p4,p5, ncol=2) #
     
     })
 
