@@ -214,28 +214,28 @@ ui <- fluidPage(theme = shinytheme("journal"),
                                      div(plotOutput("reg.plot3", width=fig.width, height=fig.height)),  
                                      
                                      
-                                  #   h3("Figure 1 Left panel untransformed data, right panel natural log transformation labelled with antilogs"),
+                                    h3(" "),
                                      
                                      p(strong(
-                                      " The first option  '1. Select which biochemistry test to present' 
-                                      allows the selction of one particular test. The next option 2. Select plot
+                                      "On this first tab, first select the test that one wants to examine. 
+The plot selection 'Overall' allows a visual comparison between the Active and Placebo responses for all patients over all visits.
+The plot selection 'Individual' allows one to select any particular patient and visualise their profile. More than one patient can be examined simutaneously. 
+The third 'Select plot' option allows one to look at only patient at a time but all their test results simultaneously.
+Moving on to the Summary statistics, we see the said statistics for the selected test. These are typically what is presented.
+These are often supplemented with change from baseline and percentage change frome baseline. However the purpose of a parallel-group randomized trial is 
+to compare the parallel groups, not to look at change from baseline. 
+                                      Baseline should always be an adjustment covariate (only). That is precisely what we do on the next tab, where the GLS model output is presented. 
+                                      You can imagine this could be adjusted for other important covariates possibly age and sex.")) ,
                                      
-                                     Boxplots are simple graphical characterisations of continuous variables. 
-        Boxplots were proposed by Tukey, J.W. in his 1977 book 'Exploratory Data Analysis' (only in 1977!).
-                  In this example, we re-express the data using a natural logarithmic transformation.
-                  Next, prior to presentation, perform the boxplot calculations. So first, perform the natural
-                  log transformation on the data. Secondly create a boxplot, 
-                  that is calculate the median, the two hinges and the whiskers. 
-                  Then we present the boxplot, finally replace the axis log values with the antilog values.")) ,
-                                     
-                                     
-                                     p(strong("There are subtleties in the boxplot calculations.
-                  Often you may hear it is said, 'the limits of the boxes represent Q1 and Q3 and the 
-                  whiskers extend +/- 1.5 x Q3-Q1'. 
-                  This is not necessarily true. There are many variations on the box plot, it is therefore better to explicitly state what is being presented.")) ,
-                                     div(""),
-                                     p(strong("I hope you agree the plot on the right gives a better understanding of the data distributions. 
-                 In this programming exercise select 'Show me the data!' and deselect 'Highlight 'outliers''.")) ,
+                 #                     
+                  p(strong("The next tab presents the model treatment effect estimates graphically and in a table for each visit with 95CIs. We do not make any adjustments for modelling over 20 diagnostic tests. ")),
+                  
+                 #  Often you may hear it is said, 'the limits of the boxes represent Q1 and Q3 and the 
+                 #  whiskers extend +/- 1.5 x Q3-Q1'. 
+                 #  This is not necessarily true. There are many variations on the box plot, it is therefore better to explicitly state what is being presented.")) ,
+                 #                     div(""),
+                 #                     p(strong("I hope you agree the plot on the right gives a better understanding of the data distributions. 
+                 # In this programming exercise select 'Show me the data!' and deselect 'Highlight 'outliers' '.")) ,
                                      
                             ) ,
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -265,7 +265,8 @@ ui <- fluidPage(theme = shinytheme("journal"),
                                      # div(class="span7", verbatimTextOutput("reg.summary4")),
                                      p(strong("Be patient...A generalised least squares model fit with unstructured covariance structure will appear, 
                                      the reference level for the visit variable is selected using the slider '5. Estimate treatment effect at this visit'.
-                                     This means we can simply read off the treatment effect ' trt=Placebo ' directly from the model output, for the treatment effect estimate comparing Placebo - Active at that particular visit.")),
+                                     This means we can simply read off the treatment effect ' trt=Placebo ' directly from the model output, 
+                                              for the treatment effect estimate comparing Placebo - Active at that particular visit. Note often a log transformation of laboratory test data will be fruitful as the data is often skewed and negative values are not expected.")),
                                      div(class="span7", verbatimTextOutput("table4")),
                                       div(class="span7", verbatimTextOutput("reg.summary2")),
                                      
@@ -321,7 +322,8 @@ ui <- fluidPage(theme = shinytheme("journal"),
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                              tabPanel("Data listing", value=3, 
                                       h2("Data listing"),
-                                      div( verbatimTextOutput("table1")),
+                                      DT::dataTableOutput("table1"),
+                                      #div( verbatimTextOutput("table1")),
                              ) 
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                         )
@@ -900,7 +902,7 @@ server <- shinyServer(function(input, output   ) {
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
     # listing of simulated data
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-    output$table1 <- renderPrint({
+    output$table1 <- DT::renderDataTable({
         
         foo<- make.data()$d1
         
@@ -914,7 +916,14 @@ server <- shinyServer(function(input, output   ) {
         
         rownames(foo) <- NULL
         
-        return(foo)
+        
+        library(DT)
+        
+        foo <-   foo %>%
+          datatable(  ) %>%
+          formatRound(
+            columns= c("Biochemistry test", "ID", "Visit", "Treatment","Response"), digits=4)  
+        
         
     })
     
