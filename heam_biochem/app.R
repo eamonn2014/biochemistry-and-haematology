@@ -15,6 +15,8 @@ library(VCA)
 library(MASS)
 require(tidyverse)
 require(ggplot2)
+library(shinyWidgets)
+
 options(max.print=1000000)
 fig.width <- 1200
 fig.height <- 550
@@ -79,20 +81,71 @@ biochemistry <- c(
     "Triglycerides (mmol/L)"  
 )
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-ui <- fluidPage(theme = shinytheme("journal"),
+ui <- fluidPage(theme = shinytheme("paper"), #https://www.rdocumentation.org/packages/shinythemes/versions/1.1.2
+                
+                
+                 tags$style(HTML(" 
+                          .skin-blue .sidebar-menu > li.active > a { border-left-color: #ff3300;}
+                   ")), 
+                
+                
+                 setBackgroundColor(
+                    color = c("#F7FBFF", "#2171B5"),
+                   gradient = "radial",
+                    direction = c("bottom", "right")
+                 ),
+                # .skin-blue .sidebar-menu > li.active > a {
+                #   border-left-color: #ff0000;
+                # }
                 
                 shinyUI(pageWithSidebar(
                     
                     #ui <-shinyUI(pageWithSidebar(
+                  
+                  
                     
                     headerPanel("Presenting the results of diagnostic tests routinely ordered to determine general 
                     health status"),
                     
+             
+               
+                    
                     #sidebarLayout(  #new
                     # Sidebar with a slider and selection inputs
                     
-                    sidebarPanel( 
+                
+                      sidebarPanel( #tags$hr()  ,
+                      
+                        tags$style(HTML(" 
+                          .skin-blue .sidebar-menu > li.active > a { border-left-color: #ff3300;}
+                   ")), 
+        #                 tags$head(tags$style(
+        #                   HTML('
+        #  #sidebar {
+        #     background-color: #dec4de;
+        # }
+        # 
+        # body, label, input, button, select { 
+        #   font-family: "Arial";
+        # }')
+        #                 )),
                         
+                        
+                   #      tags$style(HTML(" 
+                   #          .sidebar-default .sidebar-brand {color: cyan;}
+                   #  .sidebar { background-color: lightblue;}
+                   #          
+                   # ")),
+       #                  tags$head(tags$style(
+       #                    HTML('
+       #   sidebarpanel {
+       #      background-color: #ffffff;
+       #  }
+       # 
+       # ')
+       #                  )),
+                        
+            
                     div(p("Typically for clinical trials and non-interventional studies reams of
                     output tables are generated presenting biochemistry and haemotology test results, perhaps summarised over time.
                     We will focus on biochemistry tests that are routinely ordered to determine a patient's general 
@@ -191,6 +244,7 @@ ui <- fluidPage(theme = shinytheme("journal"),
                     
                     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~tab panels
                     mainPanel(
+                      
                         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                         #    tabsetPanel(type = "tabs", 
                         navbarPage(       
@@ -198,7 +252,7 @@ ui <- fluidPage(theme = shinytheme("journal"),
                             tags$style(HTML(" 
                             .navbar-default .navbar-brand {color: cyan;}
                             .navbar-default .navbar-brand:hover {color: blue;}
-                            .navbar { background-color: lightgrey;}
+                            .navbar { background-color: lightblue;}
                             .navbar-default .navbar-nav > li > a {color:black;}
                             .navbar-default .navbar-nav > .active > a,
                             .navbar-default .navbar-nav > .active > a:focus,
@@ -207,6 +261,7 @@ ui <- fluidPage(theme = shinytheme("journal"),
                             .navbar-default .navbar-nav > li > a[data-value='t1'] {color: red;background-color: pink;}
                             .navbar-default .navbar-nav > li > a[data-value='t2'] {color: blue;background-color: lightblue;}
                             .navbar-default .navbar-nav > li > a[data-value='t3'] {color: green;background-color: lightgreen;}
+     
                    ")), 
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~end of section to add colour     
                             tabPanel("Plotting the data", 
@@ -242,7 +297,10 @@ to compare the parallel groups, not to look at change from baseline.
                             tabPanel("Summary statistics", value=3, 
                                      #  div( verbatimTextOutput("table2")),
                                      h2("Summary statistics, typically generated as outputs for clinicial scrutiny"),
-                                     DT::dataTableOutput("table2")
+                                     DT::dataTableOutput("table2"),
+                                     #
+                                    # tags$head(tags$style("#dummy table {background-color: red; }", media="screen", type="text/css")),
+                                     
                             ) ,
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             tabPanel("Statistical modelling", value=3, 
@@ -730,7 +788,11 @@ server <- shinyServer(function(input, output   ) {
                             strip.text.x = element_text(size = 16, colour = "black", angle = 0),
                             axis.title.y = element_text(size = rel(1.5), angle = 90),
                             axis.title.x = element_text(size = rel(1.5), angle = 0),
-                            strip.background = element_rect(colour = "black", fill = "white")
+                            strip.background = element_rect(colour = "black", fill = "#CCCCCC"),
+                           #panel.background = element_rect(fill = '#FFCCCC', colour = 'red'),
+                           plot.background = element_rect(fill = '#FFFFFF', colour = 'red'),#
+                           
+                            
                             
                       ) 
             )
