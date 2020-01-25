@@ -32,27 +32,6 @@ options(width=100)
 
 is.even <- function(x){ x %% 2 == 0 }
 
-# mdata <- function( n,beta0, beta1, beta2, ar.val, sigma, tau0, tau1, tau01, m ) {
-#     
-#     p <- round(runif(n,4,m))
-#     obs <- unlist(sapply(p, function(x) c(1, sort(sample(2:m, x-1, replace=FALSE)))))
-#     dat <- data.frame(id=rep(1:n, times=p), obs=obs)
-#     dat$trt = 1*is.even(as.numeric(as.character(dat$id)))
-#     dat$trt1 <- ifelse(dat$obs==1,  0, dat$trt) # new manipulate so trt effect after first visit 
-#     mu  <- c(0,0)
-#     S   <- matrix(c(1, tau01, tau01, 1), nrow=2)
-#     tau <- c(tau0, tau1)
-#     S   <- diag(tau) %*% S %*% diag(tau)
-#     U   <- mvrnorm(n, mu=mu, Sigma=S)  # rows = patients
-#     dat$eij <- unlist(sapply(p, function(x) arima.sim(model=list(ar=ar.val), n=x) * sqrt(1-ar.val^2) * sigma))
-#     dat$yij <- (beta0 + rep(U[,1], times=p)) + (beta1 + rep(U[,2], times=p)) * (dat$obs) + dat$eij + beta2*dat$trt1 # beta2*dat$trt NEW
-#     dat$trt1 <- NULL # new i want treatmetn effect after first visit
-#     z <-  groupedData(yij ~ obs + trt | id, data=dat)   #TRT NEW
-#     
-#     return(z)
-#     
-# }
-
 biochemistry <- c(
     "Fasting blood glucose (mg/dL)"  ,
     "HbA1c glycosylated hemoglobin (%)",  
@@ -106,7 +85,7 @@ ui <- fluidPage(theme = shinytheme("paper"), #https://www.rdocumentation.org/pac
                           I would argue that these parameters should always be 
                           plotted. R Shiny is an ideal medium to communicate this information
                           in a more useful and exciting way.  We will focus on biochemistry tests that are routinely ordered to determine a patient's general 
-                    health status. 
+                    health status [2]. 
                           I will make an attempt using simulated data.")),
                         
                         div(
@@ -121,7 +100,7 @@ ui <- fluidPage(theme = shinytheme("paper"), #https://www.rdocumentation.org/pac
                             div(("  
                            
                             We can select an overall plot, showing 
-                            all patient profiles and boxplots across visits. Boxplots are generated using the ggplot2 package [2].
+                            all patient profiles and boxplots across visits. Boxplots are generated using the ggplot2 package [3].
                             Each biochemistry test can be inspected one by one. 
                             The '2 Select plot' = 'Individual' allows
                             the inspection of patient profiles of choice to be displayed, by typing in the subject identifier 
@@ -157,11 +136,13 @@ ui <- fluidPage(theme = shinytheme("paper"), #https://www.rdocumentation.org/pac
                             div(p( strong("References:"))),  
                             
                          
-                            tags$a(href = "https://ggplot2.tidyverse.org/reference/geom_boxplot.html", "[1] Boxplots using ggplot2"),
+                       
+                            tags$a(href = "https://en.wikipedia.org/wiki/Anscombe%27s_quartet", "[1] Anscombe's quartet"),
                             div(p(" ")),
-                            tags$a(href = "https://en.wikipedia.org/wiki/Anscombe%27s_quartet", "[2] Anscombe's quartet"),
+                            tags$a(href = "https://en.wikipedia.org/wiki/Comprehensive_metabolic_panel", "[2] Comprehensive metabolic panel"),
                             div(p(" ")),
-                         
+                            tags$a(href = "https://ggplot2.tidyverse.org/reference/geom_boxplot.html", "[3] Boxplots using ggplot2"),
+                            div(p(" ")),
                             
                         )
                         
@@ -224,7 +205,7 @@ to compare the parallel groups, not to look at change from baseline.
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             tabPanel("Statistical modelling", value=6, 
                                      h4("Modelling"),
-                                     p(strong("Be patient...A generalised least squares model fit with unstructured covariance structure will appear, 
+                                     p(strong("Be patient...a generalised least squares model fit with unstructured covariance structure will appear, 
                                      the reference level for the visit variable is selected using the slider '5. Estimate treatment effect at this visit'.
                                      This means we can simply read off the treatment effect ' trt=Placebo ' directly from the model output, 
                                               for the treatment effect estimate comparing Placebo - Active at that particular visit. Note often a log transformation of laboratory test data will be fruitful as the data is often skewed and negative values are not expected.")),
