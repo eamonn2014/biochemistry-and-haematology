@@ -795,7 +795,7 @@ server <- shinyServer(function(input, output   ) {
                           position = pd, size=3, show.legend = FALSE) 
             
             #####################
-            print(pr1 + labs(y=target, x = "Visit") + 
+            print(pr1 + labs(y=target, x = "Follow up visit") + 
                       ggtitle(paste0("There are N=",
                                      length(unique(d$rep)),  
     " patients with data at baseline, presenting all patient profiles, with boxplots and the number of patient values at each visit") ) +
@@ -905,7 +905,7 @@ server <- shinyServer(function(input, output   ) {
                                  position = pd, size=5, show.legend = FALSE) 
                    
                    #####################
-                   print(pr1 + labs(y=target, x = "Visit") + 
+                   print(pr1 + labs(y=target, x = "Follow up visit") + 
                             # ggtitle(paste0("N=",length(unique(d$rep)),
                              #               " is the total number of patients; profiles with the number of patient values at visit") ) +
                           # ggtitle(paste0("There are N=",length(unique(d$rep)),  " patients with data at baseline, boxplots at each visit with all patient profiles and the number of patient values at each visit") ) +
@@ -1098,12 +1098,34 @@ server <- shinyServer(function(input, output   ) {
      
         library(DT)
 
-        ff <-   f %>%
-        datatable(  ) %>%
-        formatRound(
-          columns=c("Minimum", "Mean" , "SD", "SE", "Q1","Median","Q3", "Maximum"), digits=2)  
-        
+        # ff <-   f %>%
+        # datatable(  ) %>%
+        # formatRound(
+        #   columns=c("Minimum", "Mean" , "SD", "SE", "Q1","Median","Q3", "Maximum"), digits=2)  
+        # 
        
+        
+        datatable(f,   
+                  
+                  rownames = TRUE,
+                  
+                  options = list(
+                    searching = TRUE,
+                    pageLength = input$V-1,
+                    paging=FALSE,
+                    lengthMenu = FALSE ,
+                    lengthChange = FALSE,
+                    autoWidth = FALSE
+                    # colReorder = TRUE,
+                    # deferRender = TRUE,
+                    # scrollY = 200,
+                    # scroller = T
+                  ))  %>%
+          formatRound(
+            columns= c("Minimum", "Mean" , "SD", "SE", "Q1","Median","Q3", "Maximum"), digits=c(2)  )
+      #})
+        
+        
         #              
                     
         # datatable(f,  options = list(
