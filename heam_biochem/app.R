@@ -359,13 +359,13 @@ to compare the parallel groups, not to look at change from baseline.
                             
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                              tabPanel("Plot of the treatment effect estimates", 
-                                      h4("Plot of the treatment effect estimates"),
+                                    #  h4("Plot of the treatment effect estimates"),
                                       div(plotOutput("reg.plote", width=fig.width, height=fig.height2)),  
-                                      h4("Table of the treatment effect estimates"),
+                                     # h4("Table of the treatment effect estimates"),
                                      # p(strong("Use Harrell's rms function 'contrast' to estimate the treatment effect at each visit:")),
                                    #   DT::dataTableOutput("reg.summary4"),
                                      
-                                     div(DT::dataTableOutput("reg.summary4"), style = "font-size: 125%; width: 75%")
+                                     div(DT::dataTableOutput("reg.summary4"), style = "font-size: 110%; width: 75%")
                                      # div(class="span7", verbatimTextOutput("reg.summary4")),
                                      # column(
                                      #   dataTableOutput(outputId = "reg.summary4"), width = 6)
@@ -544,7 +544,12 @@ server <- shinyServer(function(input, output   ) {
         colnames(d1)[colnames(d1)=="trt"] <- "tailindex"
         colnames(d1)[colnames(d1)=="obs"] <- "memorypar"
         colnames(d1)[colnames(d1)=="id"] <- "rep"
+        
+        d1$memorypar <- d1$memorypar - 1
         d1$memorypar <- factor(d1$memorypar)
+        
+        
+        
         d1$tailindex <- factor(d1$tailindex)
         d1$tailindex <- ifelse(d1$tailindex %in% 1, "Active","Placebo" )
            
@@ -588,17 +593,17 @@ server <- shinyServer(function(input, output   ) {
        #convert time=1 to baseline var
        d <- d[, c("test", "rep", "time", "trt", "yij")]
        d$id=1:nrow(d)  # add index
-       baseline <- d[d$time %in% 1,] # create baseline removing baseline
+       baseline <- d[d$time %in% 0,] # create baseline removing baseline
        names(baseline) <-  c("test", "rep", "time", "trt", "baseline", "id")
        baseline$id <- NULL
        baseline$time <- NULL
-       d2 <- d[!d$time ==1,]         # create follow up
+       d2 <- d[!d$time ==0,]         # create follow up
        both <- merge (baseline , d2   , all=TRUE)
        both$rep <- as.numeric(as.character(both$rep))
        both <- plyr::arrange(both, rep, time)
        both$time <- as.numeric(as.character(both$time))
        d <- both
-       d$time= d$time-1
+       #d$time= d$time-1
        d$time<-factor(d$time)
        d$time <- relevel(d$time, ref=input$VV)
        z<-d
@@ -701,7 +706,9 @@ server <- shinyServer(function(input, output   ) {
         
         fit <- f$fit.res
         
-        time. <-  rep(1:(input$V-1))
+       time. <-  rep(1:(input$V-1))
+        
+       # time. <-  rep(1:(input$V))
         
         k1 <- contrast(fit, list(time=time.,  trt = 'Placebo'),
                             list(time=time.,  trt = 'Active'))
@@ -713,7 +720,8 @@ server <- shinyServer(function(input, output   ) {
         
         ggplot (k1, aes(x=time. , y=Contrast, group=1)) + geom_point () + geom_line () +
             ylim(mi,ma) +
-            xlim(1, input$V-1) +
+         #   xlim(1, input$V-1) +
+          xlim(1, input$V) +
             scale_x_continuous(breaks=c(time.)) +
           
             ylab( 'Placebo - Active')+ xl +
@@ -1041,8 +1049,8 @@ server <- shinyServer(function(input, output   ) {
         
         rownames(foo) <- NULL
        # foo$Visit <- foo$Visit-1
-        foo$Visit <- as.numeric(as.character(foo$Visit))
-        foo$Visit <- (foo$Visit)-1
+       # foo$Visit <- as.numeric(as.character(foo$Visit))
+      #  foo$Visit <- (foo$Visit)-1
      #   foo$Visit <- plyr::revalue(foo$Visit, c("1"="baseline"))
         library(DT)
         
@@ -1093,8 +1101,8 @@ server <- shinyServer(function(input, output   ) {
       
         rownames(f) <- NULL
         
-        f$Visit <- as.numeric(as.character(f$Visit))
-        f$Visit <- (f$Visit)-1
+      #  f$Visit <- as.numeric(as.character(f$Visit))
+      #  f$Visit <- (f$Visit)-1
      
         library(DT)
 
