@@ -84,15 +84,16 @@ biochemistry <- c(
 ui <- fluidPage(theme = shinytheme("paper"), #https://www.rdocumentation.org/packages/shinythemes/versions/1.1.2
                 
                 
-                 tags$style(HTML(" 
-                          .skin-blue .sidebar-menu > li.active > a { border-left-color: #ff3300;}
-                   ")), 
+                 # tags$style(HTML(" 
+                 #          .skin-blue .sidebar-menu > li.active > a { border-left-color: #e6d4d9;}
+                 #   ")), 
                 
                 
                  setBackgroundColor(
-                    color = c("#F7FBFF", "#2171B5"),
+              #      color = c("#F7FBFF", "#2171B5"),
+                    color = c("#ecf0ba", "#bad1f0"), ##  e6e1d4
                    gradient = "radial",
-                    direction = c("bottom", "right")
+                    direction = c("bottom", "left")
                  ),
                 # .skin-blue .sidebar-menu > li.active > a {
                 #   border-left-color: #ff0000;
@@ -115,11 +116,11 @@ ui <- fluidPage(theme = shinytheme("paper"), #https://www.rdocumentation.org/pac
                     
                 
                       sidebarPanel( #tags$hr()  ,
-                      
-                        tags$style(HTML(" 
-                          .skin-blue .sidebar-menu > li.active > a { border-left-color: #ff3300;}
-                   ")), 
-        #                 tags$head(tags$style(
+        #               
+        #                 tags$style(HTML(" 
+        #                   .skin-blue .sidebar-menu > li.active > a { border-left-color: #ff3300;}
+        #            ")), 
+        # #                 tags$head(tags$style(
         #                   HTML('
         #  #sidebar {
         #     background-color: #dec4de;
@@ -148,8 +149,7 @@ ui <- fluidPage(theme = shinytheme("paper"), #https://www.rdocumentation.org/pac
             
                     div(p("Typically for clinical trials and non-interventional studies reams of
                     output tables are generated presenting biochemistry and haemotology test results, perhaps summarised over time.
-                    We will focus on biochemistry tests that are routinely ordered to determine a patient's general 
-                    health status.
+                   
                           How useful it is presenting a multitude of output tables of test result summary statistics 
                           is open to debate. Firstly, the presentation is extremely dry. 
                           There is the issue too, that it is
@@ -158,7 +158,8 @@ ui <- fluidPage(theme = shinytheme("paper"), #https://www.rdocumentation.org/pac
                           tracking individual patient profiles not possible.
                           I would argue that these parameters should always be 
                           plotted. R Shiny is an ideal medium to communicate this information
-                          in a more useful and exciting way. 
+                          in a more useful and exciting way.  We will focus on biochemistry tests that are routinely ordered to determine a patient's general 
+                    health status. 
                           I will make an attempt using simulated data.")),
                         
                         div(
@@ -173,10 +174,10 @@ ui <- fluidPage(theme = shinytheme("paper"), #https://www.rdocumentation.org/pac
                             div(strong("Select the parameters using the sliders below"),p(" ")),
                             
                             
-                            div(("Boxplots are generated using the ggplot2 package [2].  
-                            The ggplot2 default whisker length uses the common 1.5xIQR rule.
+                            div(("  
+                           
                             We can select an overall plot, showing 
-                            all patient profiles and boxplots across visits. 
+                            all patient profiles and boxplots across visits. Boxplots are generated using the ggplot2 package [2].
                             Each biochemistry test can be inspected one by one. 
                             The '2 Select plot' = 'Individual' allows
                             the inspection of patient profiles of choice to be displayed, by typing in the subject identifier 
@@ -252,7 +253,7 @@ ui <- fluidPage(theme = shinytheme("paper"), #https://www.rdocumentation.org/pac
                             tags$style(HTML(" 
                             .navbar-default .navbar-brand {color: cyan;}
                             .navbar-default .navbar-brand:hover {color: blue;}
-                            .navbar { background-color: lightblue;}
+                            .navbar { background-color: #bad1f0;}
                             .navbar-default .navbar-nav > li > a {color:black;}
                             .navbar-default .navbar-nav > .active > a,
                             .navbar-default .navbar-nav > .active > a:focus,
@@ -296,7 +297,7 @@ to compare the parallel groups, not to look at change from baseline.
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             tabPanel("Summary statistics", value=3, 
                                      #  div( verbatimTextOutput("table2")),
-                                     h2("Summary statistics, typically generated as outputs for clinicial scrutiny"),
+                                     h3("Summary statistics, typically generated as outputs for clinicial scrutiny"),
                                      DT::dataTableOutput("table2"),
                                      #
                                     # tags$head(tags$style("#dummy table {background-color: red; }", media="screen", type="text/css")),
@@ -304,7 +305,7 @@ to compare the parallel groups, not to look at change from baseline.
                             ) ,
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             tabPanel("Statistical modelling", value=3, 
-                                     h2("Modelling"),
+                                     h3("Modelling"),
                                      # div(plotOutput("reg.plot2", width=fig.width, height=fig.height)),  
                                      # h3("Figure 2 Top panel untransformed data, bottom panel using a natural log transformation"),
                                      # 
@@ -357,7 +358,7 @@ to compare the parallel groups, not to look at change from baseline.
                             
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                              tabPanel("Plot of the treatment effect estimates", 
-                                      h2("Plot of the treatment effect estimates"),
+                                      h3("Plot of the treatment effect estimates"),
                                       div(plotOutput("reg.plote", width=fig.width, height=fig.height2)),  
                                       h3("Table of the treatment effect estimates"),
                                      # p(strong("Use Harrell's rms function 'contrast' to estimate the treatment effect at each visit:")),
@@ -372,14 +373,14 @@ to compare the parallel groups, not to look at change from baseline.
                           
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             tabPanel("Diagnostics",
-                                     h2("Three residual plots to check for absence of trends in central tendency and in variability"),
+                                     h3("Three residual plots to check for absence of trends in central tendency and in variability"),
                                      div(plotOutput("res.plot", width=fig.width, height=fig.height)),       
                                      p(strong("Upper left panel shows the baseline score on the x-axis. Upper right panel shows shows time on the x-axis. Bottom left panel is the QQ plot for checking normality of residuals from the GLS fit.")),
                             ),
               
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                              tabPanel("Data listing", value=3, 
-                                      h2("Data listing"),
+                                      h3("Data listing"),
                                       DT::dataTableOutput("table1"),
                                       #div( verbatimTextOutput("table1")),
                              ) 
@@ -642,18 +643,36 @@ server <- shinyServer(function(input, output   ) {
          #    columns=c('time', 'Contrast', 'Lower', 'Upper'), digits=2)  
         # datatable(x,   options = list(dom = 't' ) )
          
+         #https://datatables.net/reference/option/
+         datatable(x,   
+            
+                   rownames = FALSE,
          
-         datatable(x, options = list(
+        options = list(
            searching = FALSE,
            pageLength = input$V-1,
-           lengthMenu = c(10) 
-         ))
+           paging=FALSE,
+           lengthMenu = FALSE ,
+           lengthChange = FALSE,
+           autoWidth = TRUE
+           # colReorder = TRUE,
+           # deferRender = TRUE,
+           # scrollY = 200,
+           # scroller = T
+         ))  %>%
+             formatRound(
+                columns=c('time', 'Contrast', 'Lower', 'Upper'), digits=c(0,2,2,2)  )
          
+         # output$myTable <- renderDataTable(df, 
+         #                                   options = list(pageLength = 15, lengthChange = FALSE),
+         #                                   rownames= FALSE)
+         # 
+        # datatable(m) %>% formatCurrency(1:2, '\U20AC', digits = 0) %>% formatRound(  3)
        #  datatable(x) %>%
        
         #   formatRound('time', 'Contrast', 'Lower', 'Upper',digits=2) #%>%
           
-         
+ 
          
          
          
@@ -771,7 +790,7 @@ server <- shinyServer(function(input, output   ) {
     " patients with data at baseline, presenting all patient profiles, with boxplots and the number of patient values at each visit") ) +
                       theme_bw() +
                       theme(legend.position="none") +
-                      theme(panel.background=element_blank(),
+                      theme(#panel.background=element_blank(),
                             # axis.text.y=element_blank(),
                             # axis.ticks.y=element_blank(),
                             # https://stackoverflow.com/questions/46482846/ggplot2-x-axis-extreme-right-tick-label-clipped-after-insetting-legend
@@ -788,9 +807,9 @@ server <- shinyServer(function(input, output   ) {
                             strip.text.x = element_text(size = 16, colour = "black", angle = 0),
                             axis.title.y = element_text(size = rel(1.5), angle = 90),
                             axis.title.x = element_text(size = rel(1.5), angle = 0),
-                            strip.background = element_rect(colour = "black", fill = "#CCCCCC"),
-                           #panel.background = element_rect(fill = '#FFCCCC', colour = 'red'),
-                           plot.background = element_rect(fill = '#FFFFFF', colour = 'red'),#
+                            strip.background = element_rect(colour = "black", fill = "gray96"),
+                           panel.background = element_rect(fill = 'gray96', colour = 'white'),
+                           plot.background = element_rect(fill = 'gray96', colour = 'white'),#
                            
                             
                             
