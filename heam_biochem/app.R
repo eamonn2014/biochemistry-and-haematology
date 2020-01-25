@@ -91,7 +91,7 @@ ui <- fluidPage(theme = shinytheme("paper"), #https://www.rdocumentation.org/pac
                 
                  setBackgroundColor(
               #      color = c("#F7FBFF", "#2171B5"),
-                    color = c("#ecf0ba", "#bad1f0"), ##  e6e1d4
+                    color = c("#d7d7ce", "#d3ced7"), ##  e6e1d4
                    gradient = "radial",
                     direction = c("bottom", "left")
                  ),
@@ -254,7 +254,7 @@ ui <- fluidPage(theme = shinytheme("paper"), #https://www.rdocumentation.org/pac
                             tags$style(HTML(" 
                             .navbar-default .navbar-brand {color: cyan;}
                             .navbar-default .navbar-brand:hover {color: blue;}
-                            .navbar { background-color: #bad1f0;}
+                            .navbar { background-color: #b6aebd;}
                             .navbar-default .navbar-nav > li > a {color:black;}
                             .navbar-default .navbar-nav > .active > a,
                             .navbar-default .navbar-nav > .active > a:focus,
@@ -300,7 +300,7 @@ to compare the parallel groups, not to look at change from baseline.
                                      #  div( verbatimTextOutput("table2")),
                                      h4("Summary statistics, typically generated as outputs for clinicial scrutiny"),
                                      DT::dataTableOutput("table2"),
-                                     #
+                                     h6("This is superior to a plain rtf output in that this can be sorted and filtered on the fly."),
                                     # tags$head(tags$style("#dummy table {background-color: red; }", media="screen", type="text/css")),
                                      
                             ) ,
@@ -391,6 +391,8 @@ to compare the parallel groups, not to look at change from baseline.
                                     #  h4("Data listing"),
                                       DT::dataTableOutput("table1"),
                                       #div( verbatimTextOutput("table1")),
+                                    h6("This is superior to a plain rtf output in that this can be sorted and filtered on the fly."),
+                                    
                              ) 
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                         )
@@ -730,7 +732,7 @@ server <- shinyServer(function(input, output   ) {
                 geom_hline(aes(yintercept = 0, colour = 'red'), linetype="dashed") +
             theme_bw() +
             theme(legend.position="none") +
-            theme(panel.background=element_blank(),
+            theme(#panel.background=element_blank(),
                   # axis.text.y=element_blank(),
                   # axis.ticks.y=element_blank(),
                   # https://stackoverflow.com/questions/46482846/ggplot2-x-axis-extreme-right-tick-label-clipped-after-insetting-legend
@@ -747,7 +749,10 @@ server <- shinyServer(function(input, output   ) {
                   strip.text.x = element_text(size = 16, colour = "black", angle = 0),
                   axis.title.y = element_text(size = rel(1.5), angle = 90),
                   axis.title.x = element_text(size = rel(1.5), angle = 0),
-                  strip.background = element_rect(colour = "black", fill = "white"))
+                  strip.background = element_rect(colour = "black", fill = "#ececf0"),
+                  panel.background = element_rect(fill = '#ececf0', colour = '#ececf0'),
+                  plot.background = element_rect(fill = '#ececf0', colour = '#ececf0')
+                  )
            
       
         
@@ -826,9 +831,9 @@ server <- shinyServer(function(input, output   ) {
                             strip.text.x = element_text(size = 16, colour = "black", angle = 0),
                             axis.title.y = element_text(size = rel(1.5), angle = 90),
                             axis.title.x = element_text(size = rel(1.5), angle = 0),
-                            strip.background = element_rect(colour = "black", fill = "gray96"),
-                           panel.background = element_rect(fill = 'gray96', colour = 'white'),
-                           plot.background = element_rect(fill = 'gray96', colour = 'white'),#
+                            strip.background = element_rect(colour = "black", fill = "#ececf0"),
+                           panel.background = element_rect(fill = '#ececf0', colour = '#ececf0'),
+                           plot.background = element_rect(fill = '#ececf0', colour = '#ececf0'),#
                            
                             
                             
@@ -924,7 +929,7 @@ server <- shinyServer(function(input, output   ) {
                                           " patients with data at baseline, presenting selected patient profiles") ) +
                            theme_bw() +
                              theme(legend.position="none") +
-                             theme(panel.background=element_blank(),
+                             theme(#panel.background=element_blank(),
                                    # axis.text.y=element_blank(),
                                    # axis.ticks.y=element_blank(),
                                    # https://stackoverflow.com/questions/46482846/ggplot2-x-axis-extreme-right-tick-label-clipped-after-insetting-legend
@@ -941,7 +946,9 @@ server <- shinyServer(function(input, output   ) {
                                    strip.text.x = element_text(size = 16, colour = "black", angle = 0),
                                    axis.title.y = element_text(size = rel(1.5), angle = 90),
                                    axis.title.x = element_text(size = rel(1.5), angle = 0),
-                                   strip.background = element_rect(colour = "black", fill = "white")
+                                   strip.background = element_rect(colour = "black", fill = "#ececf0"),
+                                   panel.background = element_rect(fill = '#ececf0', colour = '#ececf0'),
+                                   plot.background = element_rect(fill = '#ececf0', colour = '#ececf0'),#
                              ) 
                    )
                    
