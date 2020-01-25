@@ -83,7 +83,7 @@ biochemistry <- c(
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ui <- fluidPage(theme = shinytheme("paper"), #https://www.rdocumentation.org/packages/shinythemes/versions/1.1.2
                 
-                
+             
                  # tags$style(HTML(" 
                  #          .skin-blue .sidebar-menu > li.active > a { border-left-color: #e6d4d9;}
                  #   ")), 
@@ -98,15 +98,16 @@ ui <- fluidPage(theme = shinytheme("paper"), #https://www.rdocumentation.org/pac
                 # .skin-blue .sidebar-menu > li.active > a {
                 #   border-left-color: #ff0000;
                 # }
-                
+              h3("     Presenting the results of diagnostic tests routinely ordered to determine general 
+                    health status"),
                 shinyUI(pageWithSidebar(
                     
                     #ui <-shinyUI(pageWithSidebar(
                   
                   
                     
-                    headerPanel("Presenting the results of diagnostic tests routinely ordered to determine general 
-                    health status"),
+                    headerPanel(" "),
+                    
                     
              
                
@@ -208,7 +209,7 @@ ui <- fluidPage(theme = shinytheme("paper"), #https://www.rdocumentation.org/pac
                                         "5. Estimate treatment effect at this visit",
                                         min=1, max=10, step=1, value=4, ticks=FALSE),
                             
-                            
+                        
                             # sliderInput("N",
                             #             "Select the total number of data points",
                             #             min=3, max=500, step=1, value=100, ticks=FALSE),
@@ -297,15 +298,15 @@ to compare the parallel groups, not to look at change from baseline.
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             tabPanel("Summary statistics", value=3, 
                                      #  div( verbatimTextOutput("table2")),
-                                     h3("Summary statistics, typically generated as outputs for clinicial scrutiny"),
+                                     h4("Summary statistics, typically generated as outputs for clinicial scrutiny"),
                                      DT::dataTableOutput("table2"),
                                      #
                                     # tags$head(tags$style("#dummy table {background-color: red; }", media="screen", type="text/css")),
                                      
                             ) ,
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                            tabPanel("Statistical modelling", value=3, 
-                                     h3("Modelling"),
+                            tabPanel("Statistical modelling", value=6, 
+                                     h4("Modelling"),
                                      # div(plotOutput("reg.plot2", width=fig.width, height=fig.height)),  
                                      # h3("Figure 2 Top panel untransformed data, bottom panel using a natural log transformation"),
                                      # 
@@ -358,13 +359,16 @@ to compare the parallel groups, not to look at change from baseline.
                             
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                              tabPanel("Plot of the treatment effect estimates", 
-                                      h3("Plot of the treatment effect estimates"),
+                                      h4("Plot of the treatment effect estimates"),
                                       div(plotOutput("reg.plote", width=fig.width, height=fig.height2)),  
-                                      h3("Table of the treatment effect estimates"),
+                                      h4("Table of the treatment effect estimates"),
                                      # p(strong("Use Harrell's rms function 'contrast' to estimate the treatment effect at each visit:")),
-                                      DT::dataTableOutput("reg.summary4"),
+                                   #   DT::dataTableOutput("reg.summary4"),
+                                     
+                                     div(DT::dataTableOutput("reg.summary4"), style = "font-size: 125%; width: 75%")
                                      # div(class="span7", verbatimTextOutput("reg.summary4")),
-                                      
+                                     # column(
+                                     #   dataTableOutput(outputId = "reg.summary4"), width = 6)
                                       
                              ) ,
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -373,14 +377,18 @@ to compare the parallel groups, not to look at change from baseline.
                           
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             tabPanel("Diagnostics",
-                                     h3("Three residual plots to check for absence of trends in central tendency and in variability"),
+                                     h4("Four residual plots to check for absence of trends in central tendency and in variability"),
                                      div(plotOutput("res.plot", width=fig.width, height=fig.height)),       
-                                     p(strong("Upper left panel shows the baseline score on the x-axis. Upper right panel shows shows time on the x-axis. Bottom left panel is the QQ plot for checking normality of residuals from the GLS fit.")),
+                                     p(strong("Upper left panel shows the baseline score on the x-axis. 
+                                              Upper right panel shows shows time on the x-axis. 
+                                              Bottom left panel is the QQ plot for checking normality of residuals from the GLS fit.
+                                              Bottom right panel is the histogram for checking normality of residuals from the GLS fit.
+                                              ")),
                             ),
               
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                              tabPanel("Data listing", value=3, 
-                                      h3("Data listing"),
+                                    #  h4("Data listing"),
                                       DT::dataTableOutput("table1"),
                                       #div( verbatimTextOutput("table1")),
                              ) 
@@ -633,7 +641,9 @@ server <- shinyServer(function(input, output   ) {
         
         x <- as.data.frame(k1[c('time', 'Contrast', 'Lower', 'Upper')]) 
         
-        #return(list( est2=x ))
+         namez <- c("Follow-up Visit", "Placebo - Active estimate", "Lower 95%CI","Upper 95%CI")
+      
+        names(x) <- namez
         
         library(DT)
         # 
@@ -661,7 +671,7 @@ server <- shinyServer(function(input, output   ) {
            # scroller = T
          ))  %>%
              formatRound(
-                columns=c('time', 'Contrast', 'Lower', 'Upper'), digits=c(0,2,2,2)  )
+                columns=c(namez), digits=c(0,2,2,2)  )
          
          # output$myTable <- renderDataTable(df, 
          #                                   options = list(pageLength = 15, lengthChange = FALSE),
@@ -685,7 +695,7 @@ server <- shinyServer(function(input, output   ) {
     
     output$reg.plote <- renderPlot({         
      
-        xl <- xlab( 'Visit')
+        xl <- xlab( 'Follow up visit')
          
         f <- fit.regression()
         
@@ -705,9 +715,10 @@ server <- shinyServer(function(input, output   ) {
             ylim(mi,ma) +
             xlim(1, input$V-1) +
             scale_x_continuous(breaks=c(time.)) +
+          
             ylab( 'Placebo - Active')+ xl +
             geom_errorbar(aes(ymin=Lower, ymax=Upper ), width =0) +
-            ggtitle(paste0("Outcome measure ", input$Plot ,"; treatment effect estimate at each visit with 95% CI")) +
+            ggtitle(paste0("Outcome measure ", input$Plot ,"; treatment effect estimate at each follow up visit with 95% CI")) +
                 geom_hline(aes(yintercept = 0, colour = 'red'), linetype="dashed") +
             theme_bw() +
             theme(legend.position="none") +
@@ -947,7 +958,9 @@ server <- shinyServer(function(input, output   ) {
                                    
                                   colnames(d)[colnames(d)=="memorypar"] <- "Visit"
                                    
-                                  xyplot(value ~ Visit | test, main=paste0( input$Plot ,"; all observed results for patient ", i[1],""), par.settings=list(par.main.text=list(cex=2)),
+                                  xyplot(value ~ Visit | test,
+                                         main=paste0( input$Plot ,"; all observed results for patient ", i[1],""), 
+                                         par.settings=list(par.main.text=list(cex=2)),
                                          par.strip.text=list(cex=.7),
                                          group = test, data = d,
                                            type = c("p" ,"l"),  scales = "free") 
@@ -983,15 +996,30 @@ server <- shinyServer(function(input, output   ) {
           
           xl <- xlab("time")
           
-          p1 <- ggplot(d2 , aes(x=fitted , y=resid)) + geom_point () + yl 
+          p1 <- ggplot(d2 , aes(x=fitted , y=resid)) + geom_point (   colour="#69b3a2") + yl 
           
-          p3 <- ggplot(d2 , aes(x=time , y=resid)) +  geom_point () + yl  + xl +
+          p3 <- ggplot(d2 , aes(x=time , y=resid )) +  geom_point ( colour="#69b3a2") + yl  + xl +
               stat_summary(fun.data ="mean_sdl", geom='smooth') 
           
-          p4 <- ggplot(d2 , aes(sample=resid)) + stat_qq() +
-              geom_abline(intercept=mean(r), slope=sd(r)) + yl 
+          p4 <- ggplot(d2 , aes(sample=resid )) + stat_qq(colour="#69b3a2") +
+              geom_abline(intercept=mean(r), slope=sd(r)  ,  colour="black") + 
+            xlab('Residuals')   +
+            ggtitle( " ")  
+           
           
-          gridExtra::grid.arrange(p1,  p3, p4, ncol=2) #
+          p5 <- d2 %>%
+         
+            ggplot( aes(x=r)) +
+            geom_histogram( fill="#69b3a2", color="#e9ecef", alpha=0.9) + #binwidth=1, 
+            #ggtitle("Bin size = 3") +
+           # theme_ipsum() +
+           theme(
+              plot.title = element_text(size=15)
+            ) 
+          
+          
+          
+          gridExtra::grid.arrange(p1,  p3, p4,p5, ncol=2) #
     
     })
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1012,18 +1040,37 @@ server <- shinyServer(function(input, output   ) {
         names(foo) <- c("Biochemistry test", "ID", "Visit", "Treatment","Response")
         
         rownames(foo) <- NULL
-        
-        
+       # foo$Visit <- foo$Visit-1
+        foo$Visit <- as.numeric(as.character(foo$Visit))
+        foo$Visit <- (foo$Visit)-1
+     #   foo$Visit <- plyr::revalue(foo$Visit, c("1"="baseline"))
         library(DT)
         
-        foo <-   foo %>%
-          datatable(  ) %>%
+        # foo <-   foo %>%
+        #   datatable(  ) %>%
+        #   formatRound(
+        #     columns= c("Biochemistry test", "ID", "Visit", "Treatment","Response"), digits=4)  
+        # ##################################
+        datatable(foo,   
+                  
+                  rownames = TRUE,
+                  
+                  options = list(
+                    searching = TRUE,
+                    pageLength = input$V-1,
+                    paging=FALSE,
+                    lengthMenu = FALSE ,
+                    lengthChange = FALSE,
+                    autoWidth = FALSE
+                    # colReorder = TRUE,
+                    # deferRender = TRUE,
+                    # scrollY = 200,
+                    # scroller = T
+                  ))  %>%
           formatRound(
-            columns= c("Biochemistry test", "ID", "Visit", "Treatment","Response"), digits=4)  
-        
-        
+            columns= c("Biochemistry test", "ID", "Visit", "Treatment","Response"), digits=c(0,0,0,0,4)  )
     })
-    
+    ################################################
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
     # summary stats
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
@@ -1036,9 +1083,7 @@ server <- shinyServer(function(input, output   ) {
         
         foo <- foo[foo$test %in% target,]
       
-      
-      
-      
+ #  
       f<-plyr::ddply(foo, c("test", "memorypar","tailindex"), summarise,
                   min=min(hillest),mean = mean(hillest), sd = sd(hillest, na.rm=TRUE),
                   sem = sd(hillest)/sqrt(length(hillest)),  Q1=quantile(hillest, 0.25)    , 
@@ -1047,6 +1092,9 @@ server <- shinyServer(function(input, output   ) {
         names(f) <- c("Biochemistry test",  "Visit", "Treatment","Minimum", "Mean" , "SD", "SE", "Q1","Median","Q3", "Maximum")
       
         rownames(f) <- NULL
+        
+        f$Visit <- as.numeric(as.character(f$Visit))
+        f$Visit <- (f$Visit)-1
      
         library(DT)
 
