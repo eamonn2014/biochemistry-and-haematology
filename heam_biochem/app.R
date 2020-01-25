@@ -578,11 +578,27 @@ server <- shinyServer(function(input, output   ) {
         
         library(DT)
         # 
-         ff <-   x %>%
-           datatable(  ) %>%
-          formatRound(
-            columns=c('time', 'Contrast', 'Lower', 'Upper'), digits=2)  
-        # 
+         # ff <-   x %>%
+         #   datatable(  ) %>%
+         #  formatRound(
+         #    columns=c('time', 'Contrast', 'Lower', 'Upper'), digits=2)  
+        # datatable(x,   options = list(dom = 't' ) )
+         
+         
+         datatable(x, options = list(
+           searching = FALSE,
+           pageLength = input$V-1,
+           lengthMenu = c(10) 
+         ))
+         
+       #  datatable(x) %>%
+       
+        #   formatRound('time', 'Contrast', 'Lower', 'Upper',digits=2) #%>%
+          
+         
+         
+         
+         
     })     
     
     #---------------------------------------------------------------------------
