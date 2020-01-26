@@ -744,7 +744,7 @@ server <- shinyServer(function(input, output   ) {
                    
                                   i <- as.numeric(unlist(strsplit(input$vec1,",")))
                                 
-                                  d <-d1
+                                  #d <-d1
                                   
                                   dd <- d[d$rep %in% i[1],]
                                   
@@ -752,21 +752,24 @@ server <- shinyServer(function(input, output   ) {
                                   
                                   d <- dd[dd$tailindex %in% sel,]
                
-                                  require(lattice)
+                                  library(lattice)
               
                                   lattice.options(panel.error=NULL)
                                   
-                                  colnames(d)[colnames(d)=="hillest"] <- "value"
+                                  colnames(d)[colnames(d) %in% "hillest"] <- "value"
                                    
-                                  colnames(d)[colnames(d)=="memorypar"] <- "Visit"
+                                  colnames(d)[colnames(d) %in% "memorypar"] <- "Visit"
                                    
-                                  xyplot(value ~ Visit | test,
+                                 xy <<- xyplot(value ~ Visit | test,
                                          main=paste0( input$Plot ,"; all observed results for patient ", i[1]," allocated to ",sel,""), 
                                          par.settings=list(par.main.text=list(cex=2)),
                                          par.strip.text=list(cex=.7),
                                          group = test, data = d,
                                          xlab="Visit (0 denotes the baseline visit)",
                                            type = c("p" ,"l"),  scales = "free") 
+                                 
+                                 print(xy)
+                                 #dev.off()
 
                }
                
