@@ -1,12 +1,5 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Rshiny ideas from on https://gallery.shinyapps.io/multi_regression/
-# https://r.789695.n4.nabble.com/Whiskers-on-the-default-boxplot-graphics-td2195503.html
-# https://www.r-bloggers.com/whisker-of-boxplot/
-# https://journals.sagepub.com/doi/pdf/10.1177/1536867X0900900309
-# https://journals.sagepub.com/doi/pdf/10.1177/1536867X1301300214
-# https://www.stata.com/support/faqs/graphics/box-plots-and-logarithmic-scales/
-# https://stats.stackexchange.com/questions/112705/boxplots-with-lognormally-distributed-data
-# https://www.r-graph-gallery.com/96-boxplot-with-jitter.html
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 library(ggplot2)
 library(shiny) 
@@ -84,9 +77,10 @@ ui <- fluidPage(theme = shinytheme("paper"), #https://www.rdocumentation.org/pac
                           tracking individual patient profiles not possible.
                           I would argue that these parameters should always be 
                           plotted. R Shiny is an ideal medium to communicate this information
-                          in a more useful and exciting way.  We will focus on biochemistry tests that are routinely ordered to determine a patient's general 
+                          in a more useful and exciting way. R shiny allows interactive interrogation of the data on the fly. We will focus on biochemistry tests that are routinely ordered to determine a patient's general 
                     health status [2]. 
-                          I will make an attempt using simulated data.")),
+                          I will make an attempt using simulated data. The set up is thus: approximatelty 100 pateients are assigned 1:1 to an active arm or placebo arm,
+                          a panel of diagnostic test data are collected over time, the maximium number of visits determined by the slider below.")),
                         
                         div(
                             
@@ -98,11 +92,9 @@ ui <- fluidPage(theme = shinytheme("paper"), #https://www.rdocumentation.org/pac
                             div(strong("Select the parameters using the sliders below"),p(" ")),
                             
                             div(("  
-                           
-                            We can select an overall plot, showing 
+                           With the first option, each biochemistry test can be inspected one by one. Witht he second option We can select an overall plot, showing 
                             all patient profiles and boxplots across visits. Boxplots are generated using the ggplot2 package [3].
-                            Each biochemistry test can be inspected one by one. 
-                            The '2 Select plot' = 'Individual' allows
+                            he '2 Select plot' = 'Individual' allows
                             the inspection of patient profiles of choice to be displayed, by typing in the subject identifier 
                             into the third input option. 
                             Here the patient IDs are 
@@ -143,7 +135,10 @@ ui <- fluidPage(theme = shinytheme("paper"), #https://www.rdocumentation.org/pac
                             div(p(" ")),
                             tags$a(href = "https://ggplot2.tidyverse.org/reference/geom_boxplot.html", "[3] Boxplots using ggplot2"),
                             div(p(" ")),
+                            tags$a(href = "https://twitter.com/f2harrell/status/1220700181496320001", "[4] Purpose of RCT"),
+                            div(p(" ")),
                             
+                           
                         )
                         
                     ),
@@ -180,16 +175,24 @@ ui <- fluidPage(theme = shinytheme("paper"), #https://www.rdocumentation.org/pac
                                      p(strong(
                                       "On this first tab, first select the test that one wants to examine. 
 The plot selection 'Overall' allows a visual comparison between the Active and Placebo responses for all patients over all visits.
-The plot selection 'Individual' allows one to select any particular patient and visualise their profile. More than one patient can be examined simutaneously. 
-The third 'Select plot' option allows one to look at only patient at a time but all their test results simultaneously.
+The plot selection 'Individual' allows one to select any particular patient and visualise their profile. More than one patient can be examined simultaneously. 
+The third 'Select plot' option allows one to look at only patient at a time but all their test results simultaneously. 
+It would be useful to include information on within person variation for each test and perhaps the probability of observing successive increases or decreases in results.
+
+
 Moving on to the Summary statistics, we see the said statistics for the selected test. These are typically what is presented.
 These are often supplemented with change from baseline and percentage change frome baseline. However the purpose of a parallel-group randomized trial is 
 to compare the parallel groups, not to look at change from baseline. 
-                                      Baseline should always be an adjustment covariate (only). That is precisely what we do on the next tab, where the GLS model output is presented. 
+                                      Baseline should always be an adjustment covariate (only) [4]. That is precisely what we do on the next tab, where the GLS model output is presented. 
                                       You can imagine this could be adjusted for other important covariates possibly age and sex.")) ,
                                      
                  #                     
-                  p(strong("The next tab presents the model treatment effect estimates graphically and in a table for each visit with 95CIs. We do not make any adjustments for modelling over 20 diagnostic tests. ")),
+                  p(strong("The next tab presents the model treatment effect estimates for each visit, graphically
+                           and in a table with 95CIs. We do not make any adjustments
+                           for modelling over 20 diagnostic tests. The diagnostic tab presents model diagnostic plots. Here we can assess the assumptions of the regression 
+                           model. The 'Simulate a new sample' button will generate a new sample from the same data generating mechanism and is useful to assess if a particular diagnostic
+                           pattern is just unlucky or more likely a real issue with the model fit.
+                           ")),
                   
                                                  
                             ) ,
@@ -209,6 +212,7 @@ to compare the parallel groups, not to look at change from baseline.
                                      the reference level for the visit variable is selected using the slider '5. Estimate treatment effect at this visit'.
                                      This means we can simply read off the treatment effect ' trt=Placebo ' directly from the model output, 
                                               for the treatment effect estimate comparing Placebo - Active at that particular visit. Note often a log transformation of laboratory test data will be fruitful as the data is often skewed and negative values are not expected.")),
+                                     div(class="span7", verbatimTextOutput("reg.summaryx")),
                                      div(class="span7", verbatimTextOutput("table4")),
                                       div(class="span7", verbatimTextOutput("reg.summary2")),
                                             ) ,
@@ -817,7 +821,8 @@ server <- shinyServer(function(input, output   ) {
           #  theme(
           #     plot.title = element_text(size=15)
           #   ) 
-        
+        library(gridExtra)
+          library(grid)
          df <- data.frame(PF = r)
           p5 <- ggplot(df, aes(x = PF)) + 
             geom_histogram(aes(y =..density..),
@@ -826,7 +831,11 @@ server <- shinyServer(function(input, output   ) {
                            fill = "#69b3a2") +
             stat_function(fun = dnorm, args = list(mean = 0, sd = sigma(fit)  ))
           
-          gridExtra::grid.arrange(p1,  p3, p4,p5, ncol=2) #
+           grid.arrange(p1,  p3, p4,p5, ncol=2,
+         
+                        top = textGrob(paste0(input$Plot, " GLS model fit diagnostics"),gp=gpar(fontsize=20,font=3)))
+           #+
+            #main=paste0(input$Plot, "GLS model fit diagnostics")  #
     
     })
 
@@ -920,6 +929,14 @@ server <- shinyServer(function(input, output   ) {
         
         return(list(summary))
         
+    })  
+    
+    output$reg.summaryx <- renderPrint({
+      
+      summary <- input$Plot
+      
+      return(list(summary))
+      
     })  
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
