@@ -79,7 +79,7 @@ ui <- fluidPage(theme = shinytheme("paper"), #https://www.rdocumentation.org/pac
                           plotted. R Shiny is an ideal medium to communicate this information
                           in a more useful and exciting way. R shiny allows interactive interrogation of the data on the fly. We will focus on biochemistry tests that are routinely ordered to determine a patient's general 
                     health status [2]. 
-                          I will make an attempt using simulated data. The set up is thus: approximatelty 100 pateients are assigned 1:1 to an active arm or placebo arm,
+                          I will make an attempt using simulated data. The set up is thus: approximatelty 100 patients are assigned 1:1 to an active arm or placebo arm,
                           a panel of diagnostic test data are collected over time, the maximium number of visits determined by the slider below.")),
                         
                         div(
