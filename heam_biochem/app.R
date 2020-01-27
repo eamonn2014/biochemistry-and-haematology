@@ -135,10 +135,10 @@ ui <- fluidPage(theme = shinytheme("paper"), #https://www.rdocumentation.org/pac
                             div(p(" ")),
                             tags$a(href = "https://ggplot2.tidyverse.org/reference/geom_boxplot.html", "[3] Boxplots using ggplot2"),
                             div(p(" ")),
-                            tags$a(href = "https://twitter.com/f2harrell/status/1220700181496320001", "[4] Purpose of RCT"),
+                            tags$a(href = "https://en.wikipedia.org/wiki/Statistical_process_control", "[4] Statistical process control"),
                             div(p(" ")),
-                            
-                           
+                            tags$a(href = "https://twitter.com/f2harrell/status/1220700181496320001", "[5] Purpose of RCT"),
+                            div(p(" ")),
                         )
                         
                     ),
@@ -177,13 +177,14 @@ ui <- fluidPage(theme = shinytheme("paper"), #https://www.rdocumentation.org/pac
 The plot selection 'Overall' allows a visual comparison between the Active and Placebo responses for all patients over all visits.
 The plot selection 'Individual' allows one to select any particular patient and visualise their profile. More than one patient can be examined simultaneously. 
 The third 'Select plot' option allows one to look at only patient at a time but all their test results simultaneously. 
-It would be useful to include information on within person variation for each test and perhaps the probability of observing successive increases or decreases in results.
+It would be useful to include information on within person variation for each test, the concepts of statistical process control (SPC) [4] and perhaps the probability 
+of observing successive increases or decreases in results (which is 1/n!). 
 
 
 Moving on to the Summary statistics, we see the said statistics for the selected test. These are typically what is presented.
 These are often supplemented with change from baseline and percentage change frome baseline. However the purpose of a parallel-group randomized trial is 
 to compare the parallel groups, not to look at change from baseline. 
-                                      Baseline should always be an adjustment covariate (only) [4]. That is precisely what we do on the next tab, where the GLS model output is presented. 
+                                      Baseline should always be an adjustment covariate (only) [5]. That is precisely what we do on the next tab, where the GLS model output is presented. 
                                       You can imagine this could be adjusted for other important covariates possibly age and sex.")) ,
                                      
                  #                     
