@@ -199,9 +199,10 @@ to compare the parallel groups, not to look at change from baseline.
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             tabPanel("Summary statistics", value=3, 
                                      #  div( verbatimTextOutput("table2")),
-                                     h4("Summary statistics, typically generated as outputs for clinicial scrutiny"),
-                                     DT::dataTableOutput("table2"),
+                                     h4("Summary statistics, typically generated as outputs for clinicial scrutiny"),#
                                      h6("This is superior to a plain rtf output in that this can be sorted and filtered on the fly."),
+                                     DT::dataTableOutput("table2"),
+                                     #h6("This is superior to a plain rtf output in that this can be sorted and filtered on the fly."),
                                     # tags$head(tags$style("#dummy table {background-color: red; }", media="screen", type="text/css")),
                                      
                             ) ,
@@ -243,9 +244,9 @@ to compare the parallel groups, not to look at change from baseline.
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                              tabPanel("Data listing", value=3, 
                                     #  h4("Data listing"),
-                                      DT::dataTableOutput("table1"),
-                                
                                     h6("This is superior to a plain rtf output in that this can be sorted and filtered on the fly."),
+                                  DT::dataTableOutput("table1"),
+                                
                                     
                              ) 
                             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -540,6 +541,7 @@ server <- shinyServer(function(input, output   ) {
          #   xlim(1, input$V-1) +
           xlim(1, input$V) +
             scale_x_continuous(breaks=c(time.)) +
+        #   ggpubr::grids(linetype = "dashed") +
           
             ylab( 'Placebo - Active')+ xl +
             geom_errorbar(aes(ymin=Lower, ymax=Upper ), width =0) +
@@ -564,6 +566,8 @@ server <- shinyServer(function(input, output   ) {
                   strip.text.x = element_text(size = 16, colour = "black", angle = 0),
                   axis.title.y = element_text(size = rel(1.5), angle = 90),
                   axis.title.x = element_text(size = rel(1.5), angle = 0),
+                  panel.grid.major.x = element_line(color = "grey80", linetype="dotted"),
+                  panel.grid.major.y = element_line(color = "grey80", linetype="dotted"),
                   strip.background = element_rect(colour = "black", fill = "#ececf0"),
                   panel.background = element_rect(fill = '#ececf0', colour = '#ececf0'),
                   plot.background = element_rect(fill = '#ececf0', colour = '#ececf0')
@@ -747,15 +751,21 @@ server <- shinyServer(function(input, output   ) {
                    
                    
                                   i <- as.numeric(unlist(strsplit(input$vec1,",")))
-                                
-                                  #d <-d1
                                   
+                                  
+                                  if(!isTruthy(input$vec1)){
+                                    
+                                    plot(0, xaxt = 'n', yaxt = 'n', bty = 'n', pch = '', ylab = '', xlab = '')
+                                    title(toupper("The option '3. Select patient' is empty. Please enter a patient id in option 3 on the left, thank you!"), col.main = "red")
+                       
+                                  } else  {  
+                                
                                   dd <- d[d$rep %in% i[1],]
                                   
                                   sel <- unique(dd$tailindex)  
                                   
                                   d <- dd[dd$tailindex %in% sel,]
-               
+                                  
                                   library(lattice)
               
                                   lattice.options(panel.error=NULL)
@@ -773,8 +783,11 @@ server <- shinyServer(function(input, output   ) {
                                            type = c("p" ,"l"),  scales = "free") 
                                  
                                  print(xy)
-                                 #dev.off()
-
+                                 
+                                    
+                                  }
+                                  
+        
                }
                
                
@@ -823,8 +836,8 @@ server <- shinyServer(function(input, output   ) {
           #   ) 
         library(gridExtra)
           library(grid)
-         df <- data.frame(PF = r)
-          p5 <- ggplot(df, aes(x = PF)) + 
+         df <- data.frame(Residuals = r)
+          p5 <- ggplot(df, aes(x = Residuals)) + 
             geom_histogram(aes(y =..density..),
                            #breaks = seq(-50, 50, by = 2), 
                            colour = "black", 
