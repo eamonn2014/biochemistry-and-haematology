@@ -566,8 +566,8 @@ server <- shinyServer(function(input, output   ) {
                   strip.text.x = element_text(size = 16, colour = "black", angle = 0),
                   axis.title.y = element_text(size = rel(1.5), angle = 90),
                   axis.title.x = element_text(size = rel(1.5), angle = 0),
-                  panel.grid.major.x = element_line(color = "grey80", linetype="dotted"),
-                  panel.grid.major.y = element_line(color = "grey80", linetype="dotted"),
+                  panel.grid.major.x = element_line(color = "grey80", linetype="dotted", size = 1),
+                  panel.grid.major.y = element_line(color = "grey80", linetype="dotted", size = 1),
                   strip.background = element_rect(colour = "black", fill = "#ececf0"),
                   panel.background = element_rect(fill = '#ececf0', colour = '#ececf0'),
                   plot.background = element_rect(fill = '#ececf0', colour = '#ececf0')
