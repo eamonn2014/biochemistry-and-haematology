@@ -656,6 +656,13 @@ server <- shinyServer(function(input, output   ) {
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             
                }  else  if (input$Plot1 == "Individual") { 
+                 
+                 if(!isTruthy(input$vec1)){
+                   
+                   plot(0, xaxt = 'n', yaxt = 'n', bty = 'n', pch = '', ylab = '', xlab = '')
+                   title(toupper("The option '3. Select patient' is empty. Please enter a patient id in option 3 on the left, thank you!"), col.main = "red")
+                   
+                 } else {
                     
                    
                    i <- as.numeric(unlist(strsplit(input$vec1,",")))
@@ -749,6 +756,7 @@ server <- shinyServer(function(input, output   ) {
                              ) 
                    )
                    
+                 }
                 }   else  if (input$Plot1 ==  "Individual all tests") {
                    
                    
@@ -790,8 +798,8 @@ server <- shinyServer(function(input, output   ) {
                                   }
                                   
         
-               }
                
+               }
                
                
  
