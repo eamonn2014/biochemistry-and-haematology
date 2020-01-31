@@ -92,9 +92,10 @@ ui <- fluidPage(theme = shinytheme("paper"), #https://www.rdocumentation.org/pac
                             div(strong("Select the parameters using the sliders below"),p(" ")),
                             
                             div(("  
-                           With the first option, each biochemistry test can be inspected one by one. Witht he second option We can select an overall plot, showing 
+                           With the first option, each biochemistry test can be inspected one by one. With the second option we can select 
+                           an overall plot presenting 
                             all patient profiles and boxplots across visits. Boxplots are generated using the ggplot2 package [3].
-                            he '2 Select plot' = 'Individual' allows
+                            The '2 Select plot' = 'Individual' allows
                             the inspection of patient profiles of choice to be displayed, by typing in the subject identifier 
                             into the third input option. 
                             Here the patient IDs are 
