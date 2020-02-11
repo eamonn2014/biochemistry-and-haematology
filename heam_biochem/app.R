@@ -140,6 +140,9 @@ ui <- fluidPage(theme = shinytheme("paper"), #https://www.rdocumentation.org/pac
                             div(p(" ")),
                             tags$a(href = "https://twitter.com/f2harrell/status/1220700181496320001", "[5] Purpose of RCT"),
                             div(p(" ")),
+                            tags$a(href = "https://www.fharrell.com/talk/rstudio20/", "[6] R for Graphical Clinical Trial Reporting Frank Harrell"),
+                            div(p(" ")),
+                            
                         )
                         
                     ),
