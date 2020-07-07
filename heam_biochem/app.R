@@ -493,6 +493,8 @@ server <- shinyServer(function(input, output   ) {
       
         names(x) <- namez
         
+        namez2 <- c("Placebo - Active estimate", "Lower 95%CI","Upper 95%CI")
+        
         library(DT)
     
          #https://datatables.net/reference/option/
@@ -513,7 +515,7 @@ server <- shinyServer(function(input, output   ) {
            # scroller = T
          ))  %>%
              formatRound(
-                columns=c(namez), digits=c(0,2,2,2)  )
+                columns=c(namez2), digits=c(2)  )
     
          
     })     
@@ -900,7 +902,7 @@ server <- shinyServer(function(input, output   ) {
                     # scroller = T
                   ))  %>%
           formatRound(
-            columns= c("Biochemistry test", "ID", "Visit", "Treatment","Response"), digits=c(0,0,0,0,4)  )
+            columns= c("Response"), digits=c(4)  )
     })
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
