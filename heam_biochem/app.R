@@ -104,7 +104,7 @@ ui <- fluidPage(theme = shinytheme("paper"), #https://www.rdocumentation.org/pac
                             actionButton(inputId='ab1', label="RShiny code",   icon = icon("th"), 
                                          onclick ="window.open('https://raw.githubusercontent.com/eamonn2014/biochemistry-and-haematology/master/heam_biochem/app.R', '_blank')"),   
                             actionButton(inputId='ab1', label="R code",   icon = icon("th"), 
-                                         onclick ="window.open('https://raw.githubusercontent.com/eamonn2014/biochemistry-and-haematology/master/heam_biochem/app.R', '_blank')"),   
+                                         onclick ="window.open('https://raw.githubusercontent.com/eamonn2014/biochemistry-and-haematology/master/Rcode.R', '_blank')"),   
                             actionButton("resample", "Simulate a new sample"),
                             br(), br(),
                             
