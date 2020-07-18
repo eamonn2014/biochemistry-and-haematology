@@ -55,11 +55,18 @@ biochemistry <- c(
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ui <- fluidPage(theme = shinytheme("paper"), #https://www.rdocumentation.org/packages/shinythemes/versions/1.1.2
                 
-                 setBackgroundColor(
-                    color = c("#d7d7ce", "#d3ced7"),  
-                    gradient = "radial",
-                    direction = c("bottom", "left")
-                 ),
+                 # setBackgroundColor(
+                 #    color = c("#d7d7ce", "#d3ced7"),  
+                 #    gradient = "radial",
+                 #    direction = c("bottom", "left")
+                 # ),
+                setBackgroundColor(
+                  color = c( "#2171B5", "#F7FBFF"), 
+                  gradient = "linear",
+                  direction = "bottom"
+                ),
+                
+                
 
               h3("Presenting the results of diagnostic tests routinely ordered to determine general health status"),
                 shinyUI(pageWithSidebar(
@@ -84,10 +91,39 @@ ui <- fluidPage(theme = shinytheme("paper"), #https://www.rdocumentation.org/pac
                         
                         div(
                             
+                            # actionButton(inputId='ab1', label="R code",   icon = icon("th"), 
+                            #              onclick ="window.open('https://raw.githubusercontent.com/eamonn2014/biochemistry-and-haematology/master/heam_biochem/app.R', '_blank')"),   
+                            # actionButton("resample", "Simulate a new sample"),
+                            # br(), br(),
+                            
+                            
+                            ######################
+                            #tags$style(type="text/css", ".span8 .well { background-color: #00FFFF; }"),
+                            
+                            
+                            actionButton(inputId='ab1', label="RShiny code",   icon = icon("th"), 
+                                         onclick ="window.open('https://raw.githubusercontent.com/eamonn2014/biochemistry-and-haematology/master/heam_biochem/app.R', '_blank')"),   
                             actionButton(inputId='ab1', label="R code",   icon = icon("th"), 
                                          onclick ="window.open('https://raw.githubusercontent.com/eamonn2014/biochemistry-and-haematology/master/heam_biochem/app.R', '_blank')"),   
                             actionButton("resample", "Simulate a new sample"),
                             br(), br(),
+                            
+                            
+                            tags$style(".well {background-color:#CDC4C4 ;}"), ##ABB0B4AF
+                            
+                            #tags$style(".well {background-color:##00BFFF ;}"), ##ABB0B4AF
+                            #############################
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
                             
                             div(strong("Select the parameters using the sliders below"),p(" ")),
                             
@@ -103,6 +139,17 @@ ui <- fluidPage(theme = shinytheme("paper"), #https://www.rdocumentation.org/pac
                  show all patients. There is a third plot option, 'Individual all tests' which displays a matrix of scatterplots
                                 of all test results for a single patient. The patient in question is the first entry typed in the the third option.  ")),
                             br(),
+                            
+                            tags$head(
+                              tags$style(HTML('#ab1{background-color:orange}'))
+                            ),
+                            
+                            tags$head(
+                              tags$style(HTML('#resample{background-color:orange}'))
+                            ),
+                            
+                            
+                            
                             selectInput("Plot",
                                         strong("1. Select which biochemistry test to present"),
                                         choices=biochemistry),
